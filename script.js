@@ -9,23 +9,19 @@ const CATGPT_STYLE = 'Hand-drawn CatGPT comic style: A lazy cat lounging on furn
 const EXAMPLES = [
     {
         prompt: "What's the weather today?",
-        description: "Weather forecast from a lazy cat",
-        image: "images/example1.png"
+        description: "Weather forecast from a lazy cat"
     },
     {
         prompt: "How do I fix this bug?",
-        description: "Debugging advice from CatGPT",
-        image: "images/example2.png"
+        description: "Debugging advice from CatGPT"
     },
     {
         prompt: "What should I eat for dinner?",
-        description: "Culinary wisdom from a feline chef",
-        image: "images/example3.png"
+        description: "Culinary wisdom from a feline chef"
     },
     {
         prompt: "What's the meaning of life?",
-        description: "Deep philosophical cat thoughts",
-        image: "images/example4.png"
+        description: "Deep philosophical cat thoughts"
     }
 ];
 
@@ -167,8 +163,12 @@ function createExampleCard(example, index) {
     card.className = 'example-card';
     card.style.animationDelay = `${index * 0.1}s`;
     
+    // Generate dynamic image URL for each example
+    const examplePrompt = `${CATGPT_STYLE} The human asks: "${example.prompt}". The cat responds with sarcastic, lazy wisdom.`;
+    const imageUrl = `${POLLINATIONS_API}/${encodeURIComponent(examplePrompt)}?model=gptimage&token=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}&width=400&height=400&seed=${index * 1000}&nologo=true`;
+    
     const img = document.createElement('img');
-    img.src = example.image;
+    img.src = imageUrl;
     img.alt = example.description;
     img.loading = 'lazy';
     
