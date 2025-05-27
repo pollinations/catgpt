@@ -40,6 +40,33 @@ function getSavedPrompts() {
     }
 }
 
+// URL parameter handling for shared prompts
+function getURLPrompt() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('prompt');
+}
+
+function setURLPrompt(prompt) {
+    const url = new URL(window.location);
+    if (prompt) {
+        url.searchParams.set('prompt', prompt);
+    } else {
+        url.searchParams.delete('prompt');
+    }
+    window.history.replaceState({}, '', url);
+}
+
+function handleURLPrompt() {
+    const urlPrompt = getURLPrompt();
+    if (urlPrompt) {
+        userInput.value = urlPrompt;
+        // Auto-generate the meme if prompt is in URL
+        setTimeout(() => {
+            generateMeme();
+        }, 500);
+    }
+}
+
 // DOM Elements
 const userInput = document.getElementById('userInput');
 const generateBtn = document.getElementById('generateBtn');
@@ -49,34 +76,38 @@ const generatedMeme = document.getElementById('generatedMeme');
 const downloadBtn = document.getElementById('downloadBtn');
 const shareBtn = document.getElementById('shareBtn');
 const examplesGrid = document.getElementById('examplesGrid');
+const newMemeBtn = document.getElementById('newMemeBtn');
 
-// Initialize
+// Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     loadExamples();
-    setupEventListeners();
+    loadRandomCatFact();
+    handleURLPrompt(); // Handle URL prompt if present
     
-    // Add some fun to the page
-    addFloatingEmojis();
-    
-    // Show random cat fact on page load
-    setTimeout(() => {
-        const randomFact = catFacts[Math.floor(Math.random() * catFacts.length)];
-        showNotification(`Did you know? ${randomFact}`, 'info');
-    }, 3000);
-});
-
-// Set up event listeners
-function setupEventListeners() {
+    // Add event listeners
     generateBtn.addEventListener('click', generateMeme);
+    shareBtn.addEventListener('click', shareMeme);
+    newMemeBtn.addEventListener('click', () => {
+        userInput.value = '';
+        userInput.focus();
+        resultSection.classList.add('hidden');
+        // Clear URL prompt when starting fresh
+        setURLPrompt('');
+    });
+    
     userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
+        if (e.key === 'Enter') {
             generateMeme();
         }
     });
     
+    // Add some fun to the page
+    addFloatingEmojis();
+});
+
+// Set up event listeners
+function setupEventListeners() {
     downloadBtn.addEventListener('click', downloadMeme);
-    shareBtn.addEventListener('click', shareMeme);
 }
 
 // Generate meme function
@@ -116,6 +147,8 @@ async function generateMeme() {
             // Save this prompt to localStorage and refresh examples
             saveGeneratedPrompt(userQuestion);
             refreshExamples();
+            // Update URL for sharing
+            setURLPrompt(userQuestion);
         };
         img.onerror = () => {
             resetButton();
@@ -221,26 +254,54 @@ function downloadMeme() {
     showNotification('Meme downloaded! 🎉', 'success');
 }
 
-// Share meme
+// Share meme with better error handling
+let isSharing = false;
+
 async function shareMeme() {
+    // Prevent multiple simultaneous shares
+    if (isSharing) {
+        showNotification('Please wait, sharing in progress... 🔄', 'info');
+        return;
+    }
+    
+    // Check if we have a generated meme
+    if (!generatedMeme.src || generatedMeme.src === '') {
+        showNotification('Generate a meme first! 🎨', 'warning');
+        return;
+    }
+    
+    isSharing = true;
+    const currentURL = window.location.href;
+    
     const shareData = {
-        title: 'CatGPT Meme',
-        text: 'Check out this hilarious CatGPT meme I created!',
-        url: window.location.href
+        title: 'CatGPT Meme Generator',
+        text: `Check out this CatGPT meme: "${userInput.value}"`,
+        url: currentURL
     };
     
     try {
-        if (navigator.share) {
+        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
             await navigator.share(shareData);
             showNotification('Thanks for sharing! 🙌', 'success');
         } else {
             // Fallback: copy link
-            await navigator.clipboard.writeText(window.location.href);
+            await navigator.clipboard.writeText(currentURL);
             showNotification('Link copied to clipboard! 📋', 'success');
         }
     } catch (error) {
-        console.error('Error sharing:', error);
-        showNotification('Could not share. Try copying the link! 🔗', 'error');
+        // Only show error if it's not a user cancellation
+        if (error.name !== 'AbortError') {
+            console.error('Error sharing:', error);
+            try {
+                // Try clipboard fallback
+                await navigator.clipboard.writeText(currentURL);
+                showNotification('Link copied to clipboard! 📋', 'success');
+            } catch (clipboardError) {
+                showNotification('Could not share. Try copying the link manually! 🔗', 'error');
+            }
+        }
+    } finally {
+        isSharing = false;
     }
 }
 
@@ -446,6 +507,14 @@ const catFacts = [
     "The first cat in space was French 🚀",
     "Cats can rotate their ears 180 degrees 👂"
 ];
+
+// Load random cat fact
+function loadRandomCatFact() {
+    setTimeout(() => {
+        const randomFact = catFacts[Math.floor(Math.random() * catFacts.length)];
+        showNotification(`Did you know? ${randomFact}`, 'info');
+    }, 3000);
+}
 
 // Add CSS animations
 const style = document.createElement('style');
