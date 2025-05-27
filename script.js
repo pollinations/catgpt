@@ -76,7 +76,6 @@ const generatedMeme = document.getElementById('generatedMeme');
 const downloadBtn = document.getElementById('downloadBtn');
 const shareBtn = document.getElementById('shareBtn');
 const examplesGrid = document.getElementById('examplesGrid');
-const newMemeBtn = document.getElementById('newMemeBtn');
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
@@ -86,14 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Add event listeners
     generateBtn.addEventListener('click', generateMeme);
+    downloadBtn.addEventListener('click', downloadMeme);
     shareBtn.addEventListener('click', shareMeme);
-    newMemeBtn.addEventListener('click', () => {
-        userInput.value = '';
-        userInput.focus();
-        resultSection.classList.add('hidden');
-        // Clear URL prompt when starting fresh
-        setURLPrompt('');
-    });
     
     userInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
@@ -104,11 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add some fun to the page
     addFloatingEmojis();
 });
-
-// Set up event listeners
-function setupEventListeners() {
-    downloadBtn.addEventListener('click', downloadMeme);
-}
 
 // Generate meme function
 async function generateMeme() {
@@ -131,6 +119,9 @@ async function generateMeme() {
     // Start fake Gen-Z progress
     startFakeProgress();
     
+    // Start cat animation during loading
+    startCatAnimation();
+    
     // Create the full prompt using utility function
     const fullPrompt = createCatGPTPrompt(userQuestion);
     
@@ -147,6 +138,7 @@ async function generateMeme() {
             generatedMeme.src = imageUrl;
             showResult();
             resetButton();
+            stopCatAnimation(); // Stop the cat animation on success
             // Save this prompt to localStorage and refresh examples
             saveGeneratedPrompt(userQuestion);
             refreshExamples();
@@ -198,13 +190,141 @@ function handleImageError(errorType = 'general') {
     }
     
     showNotification(specificMessage, 'error');
+    stopCatAnimation(); // Stop the cat animation on error
     
-    // Add a retry suggestion after 30 seconds
-    setTimeout(() => {
-        if (generateBtn.disabled === false) { // Only show if user hasn't tried again
-            showNotification('🐱 *meows softly* Ready for another try? The queue should be clearer meow!', 'info');
+    // Start automatic retry countdown
+    startRetryCountdown();
+}
+
+// Auto-retry with Gen-Z countdown
+function startRetryCountdown() {
+    let countdown = 30;
+    const retryContainer = document.createElement('div');
+    retryContainer.id = 'retryContainer';
+    retryContainer.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #ff61d8, #05ffa1);
+        color: white;
+        padding: 2rem;
+        border-radius: 20px;
+        text-align: center;
+        z-index: 1000;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255,255,255,0.2);
+        font-family: 'Space Grotesk', sans-serif;
+        min-width: 300px;
+    `;
+    
+    const title = document.createElement('h3');
+    title.style.cssText = `
+        margin: 0 0 1rem 0;
+        font-size: 1.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    `;
+    title.innerHTML = '🔄 Auto-retry incoming...';
+    
+    const countdownDisplay = document.createElement('div');
+    countdownDisplay.style.cssText = `
+        font-size: 4rem;
+        font-weight: 700;
+        margin: 1rem 0;
+        animation: pulse 1s infinite;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    `;
+    
+    const subtitle = document.createElement('p');
+    subtitle.style.cssText = `
+        margin: 1rem 0 0 0;
+        opacity: 0.9;
+        font-size: 1rem;
+    `;
+    subtitle.innerHTML = 'No cap, we\'ll try again automatically! 💯';
+    
+    const cancelBtn = document.createElement('button');
+    cancelBtn.innerHTML = 'Cancel ❌';
+    cancelBtn.style.cssText = `
+        background: rgba(255,255,255,0.2);
+        border: 2px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        margin-top: 1rem;
+        transition: all 0.3s;
+    `;
+    
+    retryContainer.appendChild(title);
+    retryContainer.appendChild(countdownDisplay);
+    retryContainer.appendChild(subtitle);
+    retryContainer.appendChild(cancelBtn);
+    document.body.appendChild(retryContainer);
+    
+    // Countdown timer
+    const countdownInterval = setInterval(() => {
+        countdown--;
+        countdownDisplay.textContent = countdown;
+        
+        if (countdown <= 0) {
+            clearInterval(countdownInterval);
+            retryContainer.remove();
+            // Auto-retry
+            generateMeme();
         }
-    }, 30000);
+    }, 1000);
+    
+    // Cancel button
+    cancelBtn.addEventListener('click', () => {
+        clearInterval(countdownInterval);
+        retryContainer.remove();
+    });
+    
+    // Initial countdown display
+    countdownDisplay.textContent = countdown;
+}
+
+// Cat animation during loading
+let catAnimationInterval;
+
+function startCatAnimation() {
+    const catEmojis = ['🐱', '😺', '😸', '😹', '😻', '🙀', '😿', '😾', '🐈', '🐈‍⬛'];
+    
+    catAnimationInterval = setInterval(() => {
+        const cat = document.createElement('div');
+        cat.style.cssText = `
+            position: fixed;
+            font-size: ${2 + Math.random() * 2}rem;
+            z-index: 999;
+            pointer-events: none;
+            top: ${Math.random() * 100}vh;
+            left: -100px;
+            animation: catSlide ${3 + Math.random() * 2}s linear forwards;
+        `;
+        
+        cat.textContent = catEmojis[Math.floor(Math.random() * catEmojis.length)];
+        document.body.appendChild(cat);
+        
+        // Remove after animation
+        setTimeout(() => {
+            if (cat.parentNode) {
+                cat.remove();
+            }
+        }, 6000);
+    }, 400);
+}
+
+function stopCatAnimation() {
+    if (catAnimationInterval) {
+        clearInterval(catAnimationInterval);
+        catAnimationInterval = null;
+    }
+    
+    // Remove any existing cats
+    document.querySelectorAll('[style*="catSlide"]').forEach(cat => cat.remove());
 }
 
 // Reset button to original state
@@ -215,6 +335,7 @@ function resetButton() {
     generateBtn.style.cursor = 'pointer';
     loadingIndicator.classList.add('hidden');
     stopFakeProgress();
+    stopCatAnimation(); // Stop the cat animation on reset
 }
 
 // Fake Gen-Z progress messages
@@ -618,6 +739,20 @@ style.textContent = `
         }
         50% {
             transform: scale(1.05);
+        }
+    }
+    
+    @keyframes catSlide {
+        0% {
+            left: -100px;
+            transform: rotate(0deg);
+        }
+        50% {
+            transform: rotate(180deg);
+        }
+        100% {
+            left: calc(100vw + 100px);
+            transform: rotate(360deg);
         }
     }
 `;
