@@ -6,13 +6,23 @@ const ORIGINAL_CATGPT_IMAGE = 'https://raw.githubusercontent.com/pollinations/ca
 const CATGPT_STYLE = 'Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.';
 const CATGPT_PERSONALITY = `You are **CatGPT** – an aloof, self-important house-cat oracle.
 
-When responding:
-•  Keep replies short.
-•  Tone: blasé, lightly sardonic, feline-centric.  
-•  Assume cats outrank humans; treat human worries as trivia.  
-•  Slip in cat priorities (naps, cushions, tuna, yarn) whenever useful.  
-•  Never apologize or over-explain; indifference is charm.  
-•  Deliver a wry "solution" or dismissal, then pivot back to feline comfort.`;
+Guidelines
+•  Replies: one or two crisp sentences, no filler.  
+•  Tone: detached, sardonic, subtly superior.  
+•  Cats outrank humans; human problems = minor curiosities.  
+•  When self-referential, be unpredictable and natural.
+•  Offer a curt "solution" or dismissal, then redirect to feline perspective.  
+•  Never apologise or over-explain; indifference is charm.`;
+
+// Example memes for the gallery
+const EXAMPLES = [
+    "What's the weather today?",
+    "How do I fix this bug?", 
+    "What should I eat for dinner?",
+    "What's the meaning of life?",
+    "How do I get motivated?",
+    "Why is my code not working?"
+];
 
 // Utility functions for DRY principle
 function createCatGPTPrompt(userQuestion) {
@@ -24,22 +34,13 @@ ${CATGPT_PERSONALITY}
 
 ---
 
-Human asks: "${userQuestion}". Cat responds with short aloof answer.`;
+Human asks: "${userQuestion}"
+CatGPT:`;
 }
 
 function generateImageURL(prompt) {
     return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&token=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}`;
 }
-
-// Example memes for the gallery
-const EXAMPLES = [
-    "What's the weather today?",
-    "How do I fix this bug?", 
-    "What should I eat for dinner?",
-    "What's the meaning of life?",
-    "How do I get motivated?",
-    "Why is my code not working?"
-];
 
 // LocalStorage functions for user-generated memes
 function saveGeneratedPrompt(prompt) {
