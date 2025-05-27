@@ -16,26 +16,12 @@ function generateImageURL(prompt) {
 
 // Example memes for the gallery
 const EXAMPLES = [
-    {
-        prompt: "What's the weather today?",
-        description: "Weather forecast from a lazy cat"
-    },
-    {
-        prompt: "How do I fix this bug?",
-        description: "Debugging advice from CatGPT"
-    },
-    {
-        prompt: "What should I eat for dinner?",
-        description: "Culinary wisdom from a feline chef"
-    },
-    {
-        prompt: "What's the meaning of life?",
-        description: "Deep philosophical cat thoughts"
-    },
-    {
-        prompt: "i am getting too old. what can i do?",
-        description: "Worrying about getting old"
-    }
+    "What's the weather today?",
+    "How do I fix this bug?", 
+    "What should I eat for dinner?",
+    "What's the meaning of life?",
+    "How do I get motivated?",
+    "Why is my code not working?"
 ];
 
 // DOM Elements
@@ -241,36 +227,41 @@ async function shareMeme() {
 
 // Load example memes
 function loadExamples() {
-    EXAMPLES.forEach((example, index) => {
-        const card = createExampleCard(example, index);
+    EXAMPLES.forEach((prompt, index) => {
+        const card = createExampleCard(prompt, index);
         examplesGrid.appendChild(card);
     });
 }
 
 // Create example card
-function createExampleCard(example, index) {
+function createExampleCard(prompt, index) {
     const card = document.createElement('div');
     card.className = 'example-card';
     card.style.animationDelay = `${index * 0.1}s`;
     
     // Generate dynamic image URL using utility functions
-    const examplePrompt = createCatGPTPrompt(example.prompt);
+    const examplePrompt = createCatGPTPrompt(prompt);
     const imageUrl = generateImageURL(examplePrompt);
     
     const img = document.createElement('img');
     img.src = imageUrl;
-    img.alt = example.description;
+    img.alt = prompt;
     img.loading = 'lazy';
     
-    const description = document.createElement('p');
-    description.textContent = example.description;
+    const promptText = document.createElement('p');
+    promptText.textContent = `"${prompt}"`;
+    promptText.style.fontStyle = 'italic';
+    promptText.style.fontSize = '0.9rem';
+    promptText.style.color = 'var(--color-primary)';
+    promptText.style.textAlign = 'center';
+    promptText.style.margin = '0.5rem 0';
     
     card.appendChild(img);
-    card.appendChild(description);
+    card.appendChild(promptText);
     
     // Click to use this prompt
     card.addEventListener('click', () => {
-        userInput.value = example.prompt;
+        userInput.value = prompt;
         userInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         userInput.focus();
         
