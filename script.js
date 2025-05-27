@@ -7,7 +7,7 @@ const CATGPT_STYLE = 'Single-panel CatGPT webcomic on white background. Thick un
 
 // Utility functions for DRY principle
 function createCatGPTPrompt(userQuestion) {
-    return `${CATGPT_STYLE} Human asks: "${userQuestion}". Cat responds with minimal aloof answer. Example: "Nap through it."`;
+    return `${CATGPT_STYLE} Human asks: "${userQuestion}". Cat responds with short aloof answer.`;
 }
 
 function generateImageURL(prompt) {
