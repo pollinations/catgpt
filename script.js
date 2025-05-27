@@ -3,7 +3,7 @@
 // Constants
 const POLLINATIONS_API = 'https://image.pollinations.ai/prompt';
 const ORIGINAL_CATGPT_IMAGE = 'https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png';
-const CATGPT_STYLE = 'Hand-drawn, sketchy CatGPT comic. Black and white, rough pen sketch style. Lazy cat lounging with half-closed eyes. Cat treats humans as servants, prioritizes naps. Make it look imperfect and hand-drawn.';
+const CATGPT_STYLE = 'Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.';
 
 // Example memes for the gallery
 const EXAMPLES = [
@@ -79,7 +79,7 @@ async function generateMeme() {
     resultSection.classList.add('hidden');
     
     // Create the full prompt
-    const fullPrompt = `${CATGPT_STYLE} Human asks: "${userQuestion}". Cat responds with minimal aloof answer. Response example: "Nap through it."`;
+    const fullPrompt = `${CATGPT_STYLE} Human asks: "${userQuestion}". Cat responds with minimal aloof answer. Example: "Nap through it."`;
     
     try {
         // Generate the image using gptimage model with the original cat image
@@ -164,7 +164,7 @@ function createExampleCard(example, index) {
     card.style.animationDelay = `${index * 0.1}s`;
     
     // Generate dynamic image URL for each example
-    const examplePrompt = `${CATGPT_STYLE} Human asks: "${example.prompt}". Cat responds with minimal aloof answer about napping.`;
+    const examplePrompt = `${CATGPT_STYLE} Human asks: "${example.prompt}". Cat responds with minimal aloof answer.`;
     const imageUrl = `${POLLINATIONS_API}/${encodeURIComponent(examplePrompt)}?model=gptimage&token=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}&width=400&height=400&seed=${index * 1000}&nologo=true`;
     
     const img = document.createElement('img');

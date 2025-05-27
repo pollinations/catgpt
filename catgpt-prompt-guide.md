@@ -1,15 +1,14 @@
 # CatGPT Comic Generation Prompt
 
 ## Core Prompt Template
-```
-Hand-drawn, sketchy CatGPT comic. Black and white, rough pen sketch style. Human asks: "[QUESTION]". Lazy cat lounging with half-closed eyes responds with minimal aloof answer: "[SHORT RESPONSE]". Cat treats humans as servants, prioritizes naps/food. Make it look imperfect and hand-drawn.
-```
+Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. Human asks: "[QUESTION]". Cat responds: "[SHORT ALOOF ANSWER]". @missfitcomics signature. 95% black-and-white, no shading.
 
 ## Key Elements
-- **Visual**: Rough sketch, wobbly lines, not perfect
-- **Cat**: Always lying down, uninterested, half-closed eyes
-- **Responses**: Under 10 words, dismissive, demands comfort/tuna
-- **Vibe**: Cat is above human concerns
+- **Style**: Thick felt-tip marker, wobbly lines, plenty negative space
+- **Human**: Ovoid head, dot eyes, straight black bob, burgundy sweater
+- **Cat**: Upright sitting, white with black spots, minimal details
+- **Text**: Hand-written, shaky, lowercase dialogue
+- **Vibe**: Cat is above human concerns, prioritizes naps
 
 ## Example Patterns
 - "Nap through it"
