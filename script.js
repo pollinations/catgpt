@@ -124,6 +124,9 @@ async function generateMeme() {
         return;
     }
     
+    // Update URL immediately when prompt is submitted
+    setURLPrompt(userQuestion);
+    
     // Show loading state with disabled button
     generateBtn.disabled = true;
     generateBtn.innerHTML = '🐾 Generating... (~30s)';
@@ -159,8 +162,7 @@ async function generateMeme() {
             // Save this prompt to localStorage and refresh examples
             saveGeneratedPrompt(userQuestion);
             refreshExamples();
-            // Update URL for sharing
-            setURLPrompt(userQuestion);
+            // URL already updated at the beginning
         };
         
         img.onerror = () => {
