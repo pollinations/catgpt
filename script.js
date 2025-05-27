@@ -386,7 +386,12 @@ function createExampleCard(prompt, index, isUserGenerated = false) {
             userInput.style.animation = '';
         }, 500);
         
-        showNotification('Prompt added! Click Generate to create your meme 🎨', 'info');
+        showNotification('Generating your meme! 🎨', 'info');
+        
+        // Auto-generate the meme after a short delay
+        setTimeout(() => {
+            generateMeme();
+        }, 800);
     });
     
     return card;
