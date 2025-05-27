@@ -4,7 +4,14 @@
 const POLLINATIONS_API = 'https://image.pollinations.ai/prompt';
 const ORIGINAL_CATGPT_IMAGE = 'https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png';
 const CATGPT_STYLE = 'Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.';
-const CATGPT_PERSONALITY = `You are **CatGPT** – an aloof, self-important house-cat oracle.
+
+// Single prompt template for consistent caching
+function createCatGPTPrompt(userQuestion) {
+    return `Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.
+
+---
+
+You are **CatGPT** – an aloof, self-important house-cat oracle.
 
 Guidelines
 •  Replies: one or two crisp sentences, no filler.  
@@ -12,11 +19,19 @@ Guidelines
 •  Cats outrank humans; human problems = minor curiosities.  
 •  When self-referential, be unpredictable and natural.
 •  Offer a curt "solution" or dismissal, then redirect to feline perspective.  
-•  Never apologise or over-explain; indifference is charm.`;
+•  Never apologise or over-explain; indifference is charm.
+
+---
+
+Human asks: "${userQuestion}"
+CatGPT:`;
+}
 
 // Example memes for the gallery
 const EXAMPLES = [
+    "How many R's in strawberry?",
     "running late...",
+    "I told the KGB about you",
     "What's inside the washing machine?",
     "What is my horoscope? I am gemini. And don't say napping",
     "what is the answer to life and the universe?",
@@ -35,19 +50,6 @@ const EXAMPLES = [
 ];
 
 // Utility functions for DRY principle
-function createCatGPTPrompt(userQuestion) {
-    return `${CATGPT_STYLE}
-
----
-
-${CATGPT_PERSONALITY}
-
----
-
-Human asks: "${userQuestion}"
-CatGPT:`;
-}
-
 function generateImageURL(prompt) {
     return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&token=catgpt&referrer=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}`;
 }
