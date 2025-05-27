@@ -45,6 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Add some fun to the page
     addFloatingEmojis();
+    
+    // Show random cat fact on page load
+    setTimeout(() => {
+        const randomFact = catFacts[Math.floor(Math.random() * catFacts.length)];
+        showNotification(`Did you know? ${randomFact}`, 'info');
+    }, 3000);
 });
 
 // Set up event listeners
@@ -251,7 +257,7 @@ function celebrate() {
 
 // Add floating emojis for fun
 function addFloatingEmojis() {
-    const emojis = ['🐱', '💭', '✨', '🌟'];
+    const emojis = ['🐱', '💭', '✨', '🌟', '😸', '🐾', '💜', '🎨'];
     const container = document.querySelector('.container');
     
     emojis.forEach((emoji, index) => {
@@ -271,6 +277,39 @@ function addFloatingEmojis() {
         container.appendChild(floater);
     });
 }
+
+// Easter egg: Konami code
+let konamiCode = [];
+const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+
+document.addEventListener('keydown', (e) => {
+    konamiCode.push(e.key);
+    konamiCode = konamiCode.slice(-10);
+    
+    if (konamiCode.join(',') === konamiSequence.join(',')) {
+        document.body.style.animation = 'rainbow 2s';
+        showNotification('🌈 Secret mode activated! You found the easter egg! 🦄', 'success');
+        celebrate();
+        
+        // Add special cat mode
+        document.querySelectorAll('h1, h2, h3').forEach(el => {
+            el.innerHTML = el.innerHTML.replace(/Cat/g, '😸Cat😸');
+        });
+        
+        setTimeout(() => {
+            document.body.style.animation = '';
+        }, 2000);
+    }
+});
+
+// Add random cat facts
+const catFacts = [
+    "Cats spend 70% of their lives sleeping 😴",
+    "A group of cats is called a 'clowder' 🐱🐱🐱",
+    "Cats have over 20 vocalizations 🎵",
+    "The first cat in space was French 🚀",
+    "Cats can rotate their ears 180 degrees 👂"
+];
 
 // Add CSS animations
 const style = document.createElement('style');
@@ -329,25 +368,6 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
-
-// Easter egg: Konami code
-let konamiCode = [];
-const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-
-document.addEventListener('keydown', (e) => {
-    konamiCode.push(e.key);
-    konamiCode = konamiCode.slice(-10);
-    
-    if (konamiCode.join(',') === konamiSequence.join(',')) {
-        document.body.style.animation = 'rainbow 2s';
-        showNotification('🌈 Secret mode activated! 🦄', 'success');
-        celebrate();
-        
-        setTimeout(() => {
-            document.body.style.animation = '';
-        }, 2000);
-    }
-});
 
 // Add rainbow animation
 const rainbowStyle = document.createElement('style');
