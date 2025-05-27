@@ -244,9 +244,9 @@ function createExampleCard(example, index) {
     card.className = 'example-card';
     card.style.animationDelay = `${index * 0.1}s`;
     
-    // Generate dynamic image URL for each example
-    const examplePrompt = `${CATGPT_STYLE} Human asks: "${example.prompt}". Cat responds with minimal aloof answer.`;
-    const imageUrl = `${POLLINATIONS_API}/${encodeURIComponent(examplePrompt)}?model=gptimage&token=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}&width=400&height=400&seed=${index * 1000}&nologo=true`;
+    // Generate dynamic image URL for each example - SAME as main generation
+    const examplePrompt = `${CATGPT_STYLE} Human asks: "${example.prompt}". Cat responds with minimal aloof answer. Example: "Nap through it."`;
+    const imageUrl = `${POLLINATIONS_API}/${encodeURIComponent(examplePrompt)}?model=gptimage&token=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}`;
     
     const img = document.createElement('img');
     img.src = imageUrl;
