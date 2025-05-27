@@ -455,50 +455,21 @@ function downloadMeme() {
 let isSharing = false;
 
 async function shareMeme() {
-    // Prevent multiple simultaneous shares
-    if (isSharing) {
-        showNotification('Please wait, sharing in progress... 🔄', 'info');
-        return;
-    }
-    
     // Check if we have a generated meme
     if (!generatedMeme.src || generatedMeme.src === '') {
         showNotification('Generate a meme first! 🎨', 'warning');
         return;
     }
     
-    isSharing = true;
     const currentURL = window.location.href;
     
-    const shareData = {
-        title: 'CatGPT Meme Generator',
-        text: `Check out this CatGPT meme: "${userInput.value}"`,
-        url: currentURL
-    };
-    
     try {
-        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-            await navigator.share(shareData);
-            showNotification('Thanks for sharing! 🙌', 'success');
-        } else {
-            // Fallback: copy link
-            await navigator.clipboard.writeText(currentURL);
-            showNotification('Link copied to clipboard! 📋', 'success');
-        }
+        // Copy URL to clipboard
+        await navigator.clipboard.writeText(currentURL);
+        showNotification('Link copied to clipboard! 📋', 'success');
     } catch (error) {
-        // Only show error if it's not a user cancellation
-        if (error.name !== 'AbortError') {
-            console.error('Error sharing:', error);
-            try {
-                // Try clipboard fallback
-                await navigator.clipboard.writeText(currentURL);
-                showNotification('Link copied to clipboard! 📋', 'success');
-            } catch (clipboardError) {
-                showNotification('Could not share. Try copying the link manually! 🔗', 'error');
-            }
-        }
-    } finally {
-        isSharing = false;
+        console.error('Error copying to clipboard:', error);
+        showNotification('Could not copy link. Try copying it manually! 🔗', 'error');
     }
 }
 
