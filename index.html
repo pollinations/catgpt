@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐱 CatGPT Meme Generator | Pollinations.AI</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="emoji-title">
+                <span class="emoji-bounce">🐱</span> 
+                CatGPT Meme Generator 
+                <span class="emoji-bounce">✨</span>
+            </h1>
+            <p class="tagline">Turn your questions into sassy cat wisdom! 😺</p>
+        </header>
+
+        <div class="intro-section">
+            <p class="intro-text">
+                A collab with <a href="https://www.instagram.com/tanikagodbole/" target="_blank" rel="noopener">Tanika Godbole</a>, 
+                the original CatGPT creator! 🎨
+            </p>
+            <p class="intro-text small">
+                Powered by <a href="https://pollinations.ai" target="_blank" rel="noopener">Pollinations.AI</a> 🐝
+            </p>
+        </div>
+
+        <div class="generator-section">
+            <h2>✨ Create Your Meme</h2>
+            
+            <div class="input-group">
+                <label for="userInput">What do you want to ask CatGPT?</label>
+                <textarea 
+                    id="userInput" 
+                    placeholder="e.g., What's the weather today? How do I cook pasta? What's the meaning of life?"
+                    rows="3"
+                ></textarea>
+            </div>
+
+            <button id="generateBtn" class="generate-btn">
+                <span class="btn-text">Generate Meme</span>
+                <span class="btn-emoji">🎨</span>
+            </button>
+
+            <div id="loadingIndicator" class="loading hidden">
+                <div class="loading-spinner"></div>
+                <p>CatGPT is thinking... 💭</p>
+            </div>
+
+            <div id="resultSection" class="result-section hidden">
+                <h3>Your CatGPT Meme! 🎉</h3>
+                <div class="meme-container">
+                    <img id="generatedMeme" alt="Generated CatGPT meme" />
+                </div>
+                <div class="action-buttons">
+                    <button id="downloadBtn" class="action-btn">
+                        <span>Download</span> 💾
+                    </button>
+                    <button id="shareBtn" class="action-btn">
+                        <span>Share</span> 🔗
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="examples-section">
+            <h2>🌟 Examples</h2>
+            <div class="examples-grid" id="examplesGrid">
+                <!-- Examples will be loaded here -->
+            </div>
+        </div>
+
+        <div class="sponsor-section">
+            <p class="sponsor-text">
+                Keep your cat happy with premium pet food from 
+                <a href="https://www.purapep.de/" target="_blank" rel="noopener" class="sponsor-link">
+                    PuraPep 🐾
+                </a>
+            </p>
+        </div>
+
+        <footer>
+            <p>Made with 💜 by <a href="https://pollinations.ai" target="_blank" rel="noopener">Pollinations.AI</a></p>
+            <p class="footer-small">Original CatGPT comic by <a href="https://www.instagram.com/tanikagodbole/" target="_blank" rel="noopener">Tanika Godbole</a></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
