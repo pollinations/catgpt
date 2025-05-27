@@ -8,15 +8,23 @@ const CATGPT_STYLE = 'Hand-drawn CatGPT comic style: A lazy cat lounging on furn
 const EXAMPLES = [
     {
         prompt: "What's the weather today?",
-        description: "Weather forecast from a lazy cat"
+        description: "Weather forecast from a lazy cat",
+        image: "images/example1.png"
     },
     {
         prompt: "How do I fix this bug?",
-        description: "Debugging advice from CatGPT"
+        description: "Debugging advice from CatGPT",
+        image: "images/example2.png"
     },
     {
         prompt: "What should I eat for dinner?",
-        description: "Culinary wisdom from a feline chef"
+        description: "Culinary wisdom from a feline chef",
+        image: "images/example3.png"
+    },
+    {
+        prompt: "What's the meaning of life?",
+        description: "Deep philosophical cat thoughts",
+        image: "images/example4.png"
     }
 ];
 
@@ -150,19 +158,23 @@ function loadExamples() {
 function createExampleCard(example, index) {
     const card = document.createElement('div');
     card.className = 'example-card';
+    card.style.animationDelay = `${index * 0.1}s`;
     
-    // Generate example image URL
-    const examplePrompt = `${CATGPT_STYLE} The human asks: "${example.prompt}". The cat responds with sarcastic wisdom.`;
-    const imageUrl = `${POLLINATIONS_API}/${encodeURIComponent(examplePrompt)}?width=400&height=400&seed=${index}&model=flux&nologo=true`;
+    const img = document.createElement('img');
+    img.src = example.image;
+    img.alt = example.description;
+    img.loading = 'lazy';
     
-    card.innerHTML = `
-        <img src="${imageUrl}" alt="${example.description}" loading="lazy">
-        <p>${example.description}</p>
-    `;
+    const description = document.createElement('p');
+    description.textContent = example.description;
     
+    card.appendChild(img);
+    card.appendChild(description);
+    
+    // Click to use this prompt
     card.addEventListener('click', () => {
         userInput.value = example.prompt;
-        generateBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        userInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         userInput.focus();
         
         // Add a little animation to the input
@@ -170,6 +182,8 @@ function createExampleCard(example, index) {
         setTimeout(() => {
             userInput.style.animation = '';
         }, 500);
+        
+        showNotification('Prompt added! Click Generate to create your meme 🎨', 'info');
     });
     
     return card;

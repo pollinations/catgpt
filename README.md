@@ -6,19 +6,43 @@ Transform your questions into sassy cat wisdom! A collaboration between [Pollina
 
 CatGPT is an AI-powered meme generator that creates personalized cat comics in response to your questions. Just like the original CatGPT comic, our feline friend responds with lazy, sarcastic wisdom while treating humans as mere servants.
 
+This project emerged from a collaboration with Tanika Godbole, with the idea coming from Dr. Julia Degen. We're using OpenAI's GPT-Image-1 model through Pollinations.AI to democratize access to AI-generated cat wisdom!
+
 ### 🎨 Original Inspiration
 
 The CatGPT concept was created by Tanika Godbole. Check out the [first CatGPT comic on Instagram](https://www.instagram.com/p/Cn4OLhPyDLP/)!
 
-<img src="images/original.png" alt="Original CatGPT Comic" width="300">
+<div align="center">
+  <img src="images/original-catgpt.png" alt="Original CatGPT Comic" width="400">
+</div>
 
 ## ✨ Examples
 
-Here are some AI-generated CatGPT memes:
+Here are some AI-generated CatGPT memes created with our generator:
 
 <div align="center">
-  <img src="images/example1.png" alt="CatGPT Example 1" width="300">
-  <img src="images/example2.png" alt="CatGPT Example 2" width="300">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="images/example1.png" alt="Weather Forecast CatGPT" width="300"><br>
+        <em>"What's the weather today?"</em>
+      </td>
+      <td align="center">
+        <img src="images/example2.png" alt="Debugging CatGPT" width="300"><br>
+        <em>"How do I fix this bug?"</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="images/example3.png" alt="CatGPT Example 3" width="300"><br>
+        <em>More feline wisdom</em>
+      </td>
+      <td align="center">
+        <img src="images/example4.png" alt="CatGPT Example 4" width="300"><br>
+        <em>Classic cat attitude</em>
+      </td>
+    </tr>
+  </table>
 </div>
 
 ## 🚀 Features
@@ -27,13 +51,22 @@ Here are some AI-generated CatGPT memes:
 - **Instant Memes**: Generate custom cat wisdom in seconds
 - **Share & Download**: Save your favorite memes or share them with friends
 - **No Sign-up Required**: Completely free and open to use
-- **Gen-Z Friendly Design**: Modern, vibrant, and fun UI
+- **Gen-Z Friendly Design**: Modern, vibrant, and fun UI with animated elements
+- **Easter Eggs**: Hidden surprises for the curious (try the Konami code! 🎮)
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Pure HTML, CSS, and JavaScript (no frameworks needed!)
 - **AI Service**: [Pollinations.AI](https://pollinations.ai) Image API
 - **Design**: Psychedelic Gen-Z aesthetic with animated elements
+
+## 💡 The Story
+
+This project started from a LinkedIn post announcing the collaboration between Thomas Haferlach (Pollinations.AI) and Tanika Godbole. The goal is to create a fun, viral meme generator while ensuring fair attribution and revenue sharing with the original creator - something often overlooked in the AI space.
+
+## 🐾 Support
+
+Keep your cats happy with premium pet food from our sponsor [PuraPep](https://www.purapep.de/) - because even sarcastic cats deserve the best! 
 
 ## 🎯 How to Use
 
@@ -47,7 +80,7 @@ Here are some AI-generated CatGPT memes:
 
 ```bash
 # Clone the repository
-git clone https://github.com/voodoohop/catgpt.git
+git clone https://github.com/pollinations/catgpt.git
 
 # Navigate to the project
 cd catgpt
