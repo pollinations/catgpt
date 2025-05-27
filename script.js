@@ -2,6 +2,7 @@
 
 // Constants
 const POLLINATIONS_API = 'https://image.pollinations.ai/prompt';
+const ORIGINAL_CATGPT_IMAGE = 'https://github.com/pollinations/catgpt/blob/main/images/original-catgpt.png?raw=true';
 const CATGPT_STYLE = 'Hand-drawn CatGPT comic style: A lazy cat lounging on furniture, looking uninterested and sarcastic. The cat is answering a human\'s question with ironic wisdom. Black and white sketch style with speech bubbles. The cat treats humans as servants.';
 
 // Example memes for the gallery
@@ -85,8 +86,8 @@ async function generateMeme() {
     const fullPrompt = `${CATGPT_STYLE} The human asks: "${userQuestion}". The cat responds with sarcastic, lazy wisdom. Include speech bubbles with the question and answer.`;
     
     try {
-        // Generate the image
-        const imageUrl = `${POLLINATIONS_API}/${encodeURIComponent(fullPrompt)}?width=800&height=800&seed=${Date.now()}&model=flux&nologo=true`;
+        // Generate the image using gptimage model with the original cat image
+        const imageUrl = `${POLLINATIONS_API}/${encodeURIComponent(fullPrompt)}?model=gptimage&token=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}&width=800&height=800&seed=${Date.now()}&nologo=true`;
         
         // Create a new image element to handle loading
         const img = new Image();
