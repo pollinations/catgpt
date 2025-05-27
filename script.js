@@ -2,8 +2,8 @@
 
 // Constants
 const POLLINATIONS_API = 'https://image.pollinations.ai/prompt';
-const ORIGINAL_CATGPT_IMAGE = 'https://github.com/pollinations/catgpt/blob/main/images/original-catgpt.png?raw=true';
-const CATGPT_STYLE = 'Hand-drawn CatGPT comic style: A lazy cat lounging on furniture, looking uninterested and sarcastic. The cat is answering a human\'s question with ironic wisdom. Black and white sketch style with speech bubbles. The cat treats humans as servants.';
+const ORIGINAL_CATGPT_IMAGE = 'https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png';
+const CATGPT_STYLE = 'Hand-drawn, sketchy CatGPT comic. Black and white, rough pen sketch style. Lazy cat lounging with half-closed eyes. Cat treats humans as servants, prioritizes naps. Make it look imperfect and hand-drawn.';
 
 // Example memes for the gallery
 const EXAMPLES = [
@@ -79,11 +79,11 @@ async function generateMeme() {
     resultSection.classList.add('hidden');
     
     // Create the full prompt
-    const fullPrompt = `${CATGPT_STYLE} The human asks: "${userQuestion}". The cat responds with sarcastic, lazy wisdom. Include speech bubbles with the question and answer.`;
+    const fullPrompt = `${CATGPT_STYLE} Human asks: "${userQuestion}". Cat responds with minimal aloof answer. Response example: "Nap through it."`;
     
     try {
         // Generate the image using gptimage model with the original cat image
-        const imageUrl = `${POLLINATIONS_API}/${encodeURIComponent(fullPrompt)}?model=gptimage&token=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}&width=800&height=800&seed=${Date.now()}&nologo=true`;
+        const imageUrl = `${POLLINATIONS_API}/${encodeURIComponent(fullPrompt)}?model=gptimage&token=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}`;
         
         // Create a new image element to handle loading
         const img = new Image();
@@ -164,7 +164,7 @@ function createExampleCard(example, index) {
     card.style.animationDelay = `${index * 0.1}s`;
     
     // Generate dynamic image URL for each example
-    const examplePrompt = `${CATGPT_STYLE} The human asks: "${example.prompt}". The cat responds with sarcastic, lazy wisdom.`;
+    const examplePrompt = `${CATGPT_STYLE} Human asks: "${example.prompt}". Cat responds with minimal aloof answer about napping.`;
     const imageUrl = `${POLLINATIONS_API}/${encodeURIComponent(examplePrompt)}?model=gptimage&token=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}&width=400&height=400&seed=${index * 1000}&nologo=true`;
     
     const img = document.createElement('img');
