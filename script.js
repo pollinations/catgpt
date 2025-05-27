@@ -24,6 +24,22 @@ const EXAMPLES = [
     "Why is my code not working?"
 ];
 
+// LocalStorage functions for user-generated memes
+function saveGeneratedPrompt(prompt) {
+    const saved = getSavedPrompts();
+    // Add to beginning, remove duplicates, limit to 8 items
+    const updated = [prompt, ...saved.filter(p => p !== prompt)].slice(0, 8);
+    localStorage.setItem('catgpt-generated', JSON.stringify(updated));
+}
+
+function getSavedPrompts() {
+    try {
+        return JSON.parse(localStorage.getItem('catgpt-generated')) || [];
+    } catch {
+        return [];
+    }
+}
+
 // DOM Elements
 const userInput = document.getElementById('userInput');
 const generateBtn = document.getElementById('generateBtn');
@@ -97,6 +113,9 @@ async function generateMeme() {
             generatedMeme.src = imageUrl;
             showResult();
             resetButton();
+            // Save this prompt to localStorage and refresh examples
+            saveGeneratedPrompt(userQuestion);
+            refreshExamples();
         };
         img.onerror = () => {
             resetButton();
@@ -227,17 +246,35 @@ async function shareMeme() {
 
 // Load example memes
 function loadExamples() {
-    EXAMPLES.forEach((prompt, index) => {
-        const card = createExampleCard(prompt, index);
+    // Clear existing examples
+    examplesGrid.innerHTML = '';
+    
+    // Get saved prompts and combine with default examples
+    const savedPrompts = getSavedPrompts();
+    const allPrompts = [...savedPrompts, ...EXAMPLES];
+    
+    allPrompts.forEach((prompt, index) => {
+        const card = createExampleCard(prompt, index, index < savedPrompts.length);
         examplesGrid.appendChild(card);
     });
 }
 
+// Refresh examples (useful after generating new memes)
+function refreshExamples() {
+    loadExamples();
+}
+
 // Create example card
-function createExampleCard(prompt, index) {
+function createExampleCard(prompt, index, isUserGenerated = false) {
     const card = document.createElement('div');
     card.className = 'example-card';
     card.style.animationDelay = `${index * 0.1}s`;
+    
+    // Add special styling for user-generated prompts
+    if (isUserGenerated) {
+        card.style.border = '2px solid var(--color-accent)';
+        card.style.boxShadow = '0 0 10px rgba(255, 105, 180, 0.3)';
+    }
     
     // Generate dynamic image URL using utility functions
     const examplePrompt = createCatGPTPrompt(prompt);
@@ -255,6 +292,23 @@ function createExampleCard(prompt, index) {
     promptText.style.color = 'var(--color-primary)';
     promptText.style.textAlign = 'center';
     promptText.style.margin = '0.5rem 0';
+    
+    // Add "Your Meme" badge for user-generated content
+    if (isUserGenerated) {
+        const badge = document.createElement('div');
+        badge.textContent = '✨ Your Meme';
+        badge.style.cssText = `
+            background: var(--gradient-1);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        `;
+        card.appendChild(badge);
+    }
     
     card.appendChild(img);
     card.appendChild(promptText);
