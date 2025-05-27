@@ -1,0 +1,56 @@
+/* CSS Variables for CatGPT Theme */
+:root {
+    /* Colors */
+    --color-primary: #ff61d8;
+    --color-secondary: #05ffa1;
+    --color-accent: #ffcc00;
+    --color-text: #1a1a1a;
+    --color-bg: #ffffff;
+    --color-light: #f5f5f5;
+    
+    /* Gradients */
+    --gradient-1: linear-gradient(135deg, #ff61d8, #ffcc00);
+    --gradient-2: linear-gradient(135deg, #05ffa1, #00d4ff);
+    --gradient-3: linear-gradient(135deg, #ff61d8, #05ffa1, #ffcc00);
+    
+    /* Typography */
+    --font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-size-base: 1rem;
+    --font-size-sm: 0.9rem;
+    --font-size-lg: 1.2rem;
+    --font-size-xl: 1.5rem;
+    --font-size-xxl: 2rem;
+    --font-size-xxxl: 3rem;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-xxl: 3rem;
+    
+    /* Border Radius */
+    --radius-sm: 10px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-xxl: 24px;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 5px 20px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+    --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.3);
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-base: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Z-index */
+    --z-base: 1;
+    --z-overlay: 100;
+    --z-modal: 1000;
+    --z-notification: 2000;
+}

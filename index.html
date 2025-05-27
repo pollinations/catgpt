@@ -26,8 +26,12 @@
     <meta name="keywords" content="CatGPT, meme generator, cat memes, AI memes, Pollinations.AI, funny cat, meme creator">
     <meta name="author" content="Pollinations.AI & Tanika Godbole">
     
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="index.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
+    
+    <!-- Load JavaScript modules -->
+    <script type="module" src="index.js" defer></script>
+    <script type="module" src="app.js" defer></script>
 </head>
 <body>
     <div class="container">
@@ -50,48 +54,13 @@
             </p>
         </div>
 
-        <div class="generator-section">
-            <h2>✨ Create Your Meme</h2>
-            
-            <div class="input-group">
-                <label for="userInput">What do you want to ask CatGPT?</label>
-                <textarea 
-                    id="userInput" 
-                    placeholder="e.g., What's the weather today? How do I cook pasta? What's the meaning of life?"
-                    rows="3"
-                ></textarea>
-            </div>
-
-            <button id="generateBtn" class="generate-btn">
-                <span class="btn-text">Generate Meme</span>
-                <span class="btn-emoji">🎨</span>
-            </button>
-
-            <div id="loadingIndicator" class="loading hidden">
-                <div class="loading-spinner"></div>
-                <p>CatGPT is thinking... 💭</p>
-            </div>
-
-            <div id="resultSection" class="result-section hidden">
-                <h3>Your CatGPT Meme! 🎉</h3>
-                <div class="meme-container">
-                    <img id="generatedMeme" alt="Generated CatGPT meme" />
-                </div>
-                <div class="action-buttons">
-                    <button id="downloadBtn" class="action-btn">
-                        <span>Download</span> 💾
-                    </button>
-                    <button id="shareBtn" class="action-btn">
-                        <span>Share</span> 🔗
-                    </button>
-                </div>
-            </div>
-        </div>
+        <!-- Meme Generator Component -->
+        <x-meme-generator id="memeGenerator"></x-meme-generator>
 
         <div class="examples-section">
             <h2>🌟 Examples</h2>
             <div class="examples-grid" id="examplesGrid">
-                <!-- Examples will be loaded here -->
+                <!-- Example cards will be inserted here -->
             </div>
         </div>
 
@@ -109,7 +78,5 @@
             <p class="footer-small">Original CatGPT comic by <a href="https://www.instagram.com/missfitcomics/" target="_blank" rel="noopener">Tanika Godbole</a></p>
         </footer>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
