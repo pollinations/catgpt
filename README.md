@@ -91,6 +91,19 @@ open index.html
 python -m http.server 8000
 ```
 
+## 🚀 Deployment
+
+### GitHub Pages (Recommended)
+
+1. Go to your forked repository on GitHub
+2. Click on **Settings** → **Pages**
+3. Under **Source**, select **Deploy from a branch**
+4. Choose **main** branch and **/ (root)** folder
+5. Click **Save**
+6. Your site will be live at `https://[organization].github.io/catgpt/`
+
+The site should be available within a few minutes!
+
 ## 🤝 Credits & Collaboration
 
 - **Original CatGPT Creator**: [Tanika Godbole](https://www.instagram.com/tanikagodbole/)
