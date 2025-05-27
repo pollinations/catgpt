@@ -22,6 +22,10 @@ const EXAMPLES = [
     {
         prompt: "What's the meaning of life?",
         description: "Deep philosophical cat thoughts"
+    },
+    {
+        prompt: "i am getting too old. what can i do?",
+        description: "Worrying about getting old"
     }
 ];
 
@@ -73,10 +77,17 @@ async function generateMeme() {
         return;
     }
     
-    // Show loading state
+    // Show loading state with disabled button
     generateBtn.disabled = true;
+    generateBtn.innerHTML = '🐾 Generating... (~30s)';
+    generateBtn.style.opacity = '0.6';
+    generateBtn.style.cursor = 'not-allowed';
+    
     loadingIndicator.classList.remove('hidden');
     resultSection.classList.add('hidden');
+    
+    // Start fake Gen-Z progress
+    startFakeProgress();
     
     // Create the full prompt
     const fullPrompt = `${CATGPT_STYLE} Human asks: "${userQuestion}". Cat responds with minimal aloof answer. Example: "Nap through it."`;
@@ -90,8 +101,10 @@ async function generateMeme() {
         img.onload = () => {
             generatedMeme.src = imageUrl;
             showResult();
+            resetButton();
         };
         img.onerror = () => {
+            resetButton();
             throw new Error('Failed to generate image');
         };
         img.src = imageUrl;
@@ -99,9 +112,77 @@ async function generateMeme() {
     } catch (error) {
         console.error('Error generating meme:', error);
         showNotification('Oops! CatGPT is taking a nap. Try again! 😴', 'error');
-    } finally {
-        generateBtn.disabled = false;
-        loadingIndicator.classList.add('hidden');
+        resetButton();
+    }
+}
+
+// Reset button to original state
+function resetButton() {
+    generateBtn.disabled = false;
+    generateBtn.innerHTML = 'Generate CatGPT Meme 🎨';
+    generateBtn.style.opacity = '1';
+    generateBtn.style.cursor = 'pointer';
+    loadingIndicator.classList.add('hidden');
+    stopFakeProgress();
+}
+
+// Fake Gen-Z progress messages
+let progressInterval;
+let progressStep = 0;
+
+function startFakeProgress() {
+    const progressMessages = [
+        "🧠 Waking up CatGPT... (this cat is sleepy)",
+        "☕ Brewing digital coffee for maximum sass...",
+        "🎨 Sketching with chaotic energy...",
+        "😼 Teaching AI the art of being unimpressed...",
+        "📝 Writing sarcastic responses in Comic Sans...",
+        "🌙 Channeling midnight cat energy...",
+        "✨ Sprinkling some Gen-Z magic dust...",
+        "🎯 Perfecting the level of 'couldn't care less'...",
+        "🔥 Making it fire (but like, ironically)...",
+        "🎭 Adding just the right amount of drama...",
+        "💅 Polishing those aloof vibes...",
+        "🚀 Almost done! (CatGPT doesn't rush for anyone)"
+    ];
+    
+    progressStep = 0;
+    const progressText = document.createElement('div');
+    progressText.id = 'progress-text';
+    progressText.style.cssText = `
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--color-primary);
+        margin-top: 1rem;
+        font-weight: 500;
+        animation: pulse 2s infinite;
+    `;
+    
+    loadingIndicator.appendChild(progressText);
+    
+    // Update progress every 2.5 seconds
+    progressInterval = setInterval(() => {
+        if (progressStep < progressMessages.length) {
+            progressText.textContent = progressMessages[progressStep];
+            progressStep++;
+        } else {
+            progressText.textContent = "🎨 Finalizing your masterpiece...";
+        }
+    }, 2500);
+    
+    // Start with first message immediately
+    progressText.textContent = progressMessages[0];
+    progressStep = 1;
+}
+
+function stopFakeProgress() {
+    if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+    }
+    const progressText = document.getElementById('progress-text');
+    if (progressText) {
+        progressText.remove();
     }
 }
 
