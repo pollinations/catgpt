@@ -140,7 +140,10 @@ async function generateMeme() {
         
         // Create a new image element to handle loading
         const img = new Image();
+        let imageLoadTimeout;
+        
         img.onload = () => {
+            clearTimeout(imageLoadTimeout);
             generatedMeme.src = imageUrl;
             showResult();
             resetButton();
@@ -150,17 +153,58 @@ async function generateMeme() {
             // Update URL for sharing
             setURLPrompt(userQuestion);
         };
+        
         img.onerror = () => {
+            clearTimeout(imageLoadTimeout);
             resetButton();
-            throw new Error('Failed to generate image');
+            handleImageError();
         };
+        
+        // Set timeout for slow/failed loading (45 seconds)
+        imageLoadTimeout = setTimeout(() => {
+            resetButton();
+            handleImageError('timeout');
+        }, 45000);
+        
         img.src = imageUrl;
         
     } catch (error) {
         console.error('Error generating meme:', error);
-        showNotification('Oops! CatGPT is taking a nap. Try again! 😴', 'error');
         resetButton();
+        handleImageError('general');
     }
+}
+
+// Handle image loading errors with funny cat messages
+function handleImageError(errorType = 'general') {
+    const catMessages = [
+        "😾 *yawns* The art studio is full of sleeping cats... try again in 30 seconds!",
+        "🐱 *stretches paws* Too many humans asking questions! I need a catnap... wait 30 seconds, please.",
+        "😸 *knocks over coffee* Oops! The meme machine broke. Give me 30 seconds to fix it with my paws.",
+        "🙄 *rolls eyes* Seriously? Another request? The queue is fuller than my food bowl... try in 30 seconds.",
+        "😴 *curls up* All the AI cats are napping right now. Check back in 30 seconds, human.",
+        "🐾 *walks across keyboard* Purrfect timing... NOT. The servers are as full as a litter box. 30 seconds!",
+        "😼 *flicks tail dismissively* The internet tubes are clogged with cat hair. Try again in 30 seconds.",
+        "🎨 *knocks over paint* My artistic genius is in high demand! Wait your turn... 30 seconds, human."
+    ];
+    
+    const randomMessage = catMessages[Math.floor(Math.random() * catMessages.length)];
+    
+    let specificMessage;
+    if (errorType === 'timeout') {
+        specificMessage = "⏰ This cat took too long to respond... probably distracted by a laser pointer! " + randomMessage;
+    } else {
+        specificMessage = randomMessage;
+    }
+    
+    showNotification(specificMessage, 'error');
+    
+    // Add a retry suggestion after 30 seconds
+    setTimeout(() => {
+        if (generateBtn.disabled === false) { // Only show if user hasn't tried again
+            showNotification('🐱 *meows softly* Ready for another try? The queue should be clearer meow!', 'info');
+        }
+    }, 30000);
 }
 
 // Reset button to original state
