@@ -24,6 +24,7 @@ const EXAMPLES = [
     "Where should we eat in Palermo Sicily?",
     "Why do boxes call to me?",
     "Can you communicate with dolphins?",
+    "Why do keyboards attract fur?",
     "What's the weather today?",
     "How do I fix this bug?", 
     "What should I eat for dinner?",
