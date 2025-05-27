@@ -451,20 +451,26 @@ function showResult() {
 }
 
 // Download meme
-function downloadMeme() {
-    const link = document.createElement('a');
-    link.href = generatedMeme.src;
-    link.download = `catgpt-meme-${Date.now()}.png`;
-    link.click();
-    
-    showNotification('Meme downloaded! 🎉', 'success');
+async function downloadMeme() {
+    try {
+        const response = await fetch(generatedMeme.src);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `catgpt-meme-${Date.now()}.png`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        
+        showNotification('Meme downloaded! 🎉', 'success');
+    } catch (error) {
+        console.error('Download failed:', error);
+        showNotification('Download failed! Try right-clicking and save image instead.', 'error');
+    }
 }
 
-// Share meme with better error handling
-let isSharing = false;
 
 async function shareMeme() {
-    // Check if we have a generated meme
     if (!generatedMeme.src || generatedMeme.src === '') {
         showNotification('Generate a meme first! 🎨', 'warning');
         return;
@@ -481,6 +487,8 @@ async function shareMeme() {
         showNotification('Could not copy link. Try copying it manually! 🔗', 'error');
     }
 }
+
+
 
 // Load example memes
 function loadExamples() {
