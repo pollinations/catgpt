@@ -4,10 +4,27 @@
 const POLLINATIONS_API = 'https://image.pollinations.ai/prompt';
 const ORIGINAL_CATGPT_IMAGE = 'https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png';
 const CATGPT_STYLE = 'Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.';
+const CATGPT_PERSONALITY = `You are **CatGPT** – an aloof, self-important house-cat oracle.
+
+When responding:
+•  Keep replies short.
+•  Tone: blasé, lightly sardonic, feline-centric.  
+•  Assume cats outrank humans; treat human worries as trivia.  
+•  Slip in cat priorities (naps, cushions, tuna, yarn) whenever useful.  
+•  Never apologize or over-explain; indifference is charm.  
+•  Deliver a wry "solution" or dismissal, then pivot back to feline comfort.`;
 
 // Utility functions for DRY principle
 function createCatGPTPrompt(userQuestion) {
-    return `${CATGPT_STYLE} Human asks: "${userQuestion}". Cat responds with short aloof answer.`;
+    return `${CATGPT_STYLE}
+
+---
+
+${CATGPT_PERSONALITY}
+
+---
+
+Human asks: "${userQuestion}". Cat responds with short aloof answer.`;
 }
 
 function generateImageURL(prompt) {
@@ -198,7 +215,11 @@ function handleImageError(errorType = 'general') {
 
 // Auto-retry with Gen-Z countdown
 function startRetryCountdown() {
-    let countdown = 30;
+    let countdown = 10;
+    
+    // Start different cat animation for retry state
+    startCatAnimation('retry');
+    
     const retryContainer = document.createElement('div');
     retryContainer.id = 'retryContainer';
     retryContainer.style.cssText = `
@@ -225,7 +246,7 @@ function startRetryCountdown() {
         font-size: 1.5rem;
         text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     `;
-    title.innerHTML = '🔄 Auto-retry incoming...';
+    title.innerHTML = '😸 CatGPT is blowing up rn...';
     
     const countdownDisplay = document.createElement('div');
     countdownDisplay.style.cssText = `
@@ -242,7 +263,7 @@ function startRetryCountdown() {
         opacity: 0.9;
         font-size: 1rem;
     `;
-    subtitle.innerHTML = 'No cap, we\'ll try again automatically! 💯';
+    subtitle.innerHTML = 'The whole internet wants cat wisdom! Auto-retry in... 🐾';
     
     const cancelBtn = document.createElement('button');
     cancelBtn.innerHTML = 'Cancel ❌';
@@ -272,6 +293,7 @@ function startRetryCountdown() {
         if (countdown <= 0) {
             clearInterval(countdownInterval);
             retryContainer.remove();
+            stopCatAnimation(); // Stop retry cats
             // Auto-retry
             generateMeme();
         }
@@ -281,6 +303,7 @@ function startRetryCountdown() {
     cancelBtn.addEventListener('click', () => {
         clearInterval(countdownInterval);
         retryContainer.remove();
+        stopCatAnimation(); // Stop retry cats when cancelled
     });
     
     // Initial countdown display
@@ -290,11 +313,17 @@ function startRetryCountdown() {
 // Cat animation during loading
 let catAnimationInterval;
 
-function startCatAnimation() {
-    const catEmojis = ['🐱', '😺', '😸', '😹', '😻', '🙀', '😿', '😾', '🐈', '🐈‍⬛'];
+function startCatAnimation(mode = 'loading') {
+    const loadingCatEmojis = ['🐱', '😺', '😸', '😹', '😻', '🙀', '😿', '😾', '🐈', '🐈‍⬛'];
+    const retryCatEmojis = ['😾', '😿', '🙄', '😤', '😑', '😒', '😔', '🐱‍👤', '😸', '😼'];
+    
+    const catEmojis = mode === 'retry' ? retryCatEmojis : loadingCatEmojis;
+    const speed = mode === 'retry' ? 800 : 400; // Slower for retry state
     
     catAnimationInterval = setInterval(() => {
         const cat = document.createElement('div');
+        const animationName = mode === 'retry' ? 'catSlowWalk' : 'catSlide';
+        
         cat.style.cssText = `
             position: fixed;
             font-size: ${2 + Math.random() * 2}rem;
@@ -302,7 +331,7 @@ function startCatAnimation() {
             pointer-events: none;
             top: ${Math.random() * 100}vh;
             left: -100px;
-            animation: catSlide ${3 + Math.random() * 2}s linear forwards;
+            animation: ${animationName} ${3 + Math.random() * 2}s linear forwards;
         `;
         
         cat.textContent = catEmojis[Math.floor(Math.random() * catEmojis.length)];
@@ -314,7 +343,7 @@ function startCatAnimation() {
                 cat.remove();
             }
         }, 6000);
-    }, 400);
+    }, speed);
 }
 
 function stopCatAnimation() {
@@ -350,7 +379,7 @@ function startFakeProgress() {
         "😼 Teaching AI the art of being unimpressed...",
         "📝 Writing sarcastic responses in Comic Sans...",
         "🌙 Channeling midnight cat energy...",
-        "✨ Sprinkling some Gen-Z magic dust...",
+        "✨ Sprinkling some magic dust...",
         "🎯 Perfecting the level of 'couldn't care less'...",
         "🔥 Making it fire (but like, ironically)...",
         "🎭 Adding just the right amount of drama...",
@@ -743,6 +772,20 @@ style.textContent = `
     }
     
     @keyframes catSlide {
+        0% {
+            left: -100px;
+            transform: rotate(0deg);
+        }
+        50% {
+            transform: rotate(180deg);
+        }
+        100% {
+            left: calc(100vw + 100px);
+            transform: rotate(360deg);
+        }
+    }
+    
+    @keyframes catSlowWalk {
         0% {
             left: -100px;
             transform: rotate(0deg);
