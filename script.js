@@ -16,6 +16,14 @@ Guidelines
 
 // Example memes for the gallery
 const EXAMPLES = [
+    "What's inside the washing machine?",
+    "What is my horoscope? I am gemini. And don't say napping",
+    "what is the answer to life and the universe?",
+    "Should I take up the offer for a new job?",
+    "Can you help me exercise?",
+    "Where should we eat in Palermo Sicily?",
+    "Why do boxes call to me?",
+    "Can you communicate with dolphins?",
     "What's the weather today?",
     "How do I fix this bug?", 
     "What should I eat for dinner?",
