@@ -16,6 +16,7 @@ Guidelines
 
 // Example memes for the gallery
 const EXAMPLES = [
+    "running late...",
     "What's inside the washing machine?",
     "What is my horoscope? I am gemini. And don't say napping",
     "what is the answer to life and the universe?",
