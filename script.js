@@ -51,7 +51,7 @@ const EXAMPLES = [
 
 // Utility functions for DRY principle
 function generateImageURL(prompt) {
-    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&token=catgpt&referrer=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}`;
+    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}`;
 }
 
 // LocalStorage functions for user-generated memes
