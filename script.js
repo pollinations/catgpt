@@ -3,7 +3,7 @@
 // Constants
 const POLLINATIONS_API = 'https://image.pollinations.ai/prompt';
 const ORIGINAL_CATGPT_IMAGE = 'https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png';
-const CATGPT_STYLE = 'Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.';
+
 
 // Cloudinary Configuration (Free unsigned upload)
 // To use this, create a free Cloudinary account and set up an unsigned upload preset
@@ -100,7 +100,7 @@ async function handleImageUpload(file) {
 
 // Single prompt template for consistent caching
 function createCatGPTPrompt(userQuestion, hasImage) {
-    const description = hasImage ? 'check reference image,': 'black bob hair, brick/burgundy sweater';
+    const description = hasImage ? 'replace the person on the left with the person in the second image, incorporate visible elements or landmarks from the second image, caricature,': 'black bob hair, brick/burgundy sweater';
     return `Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, ${description} (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.
 
 ---
@@ -175,12 +175,12 @@ function saveGeneratedPrompt(prompt) {
         ...saved.filter(item => item.prompt !== prompt)
     ].slice(0, 8);
     
-    localStorage.setItem('catgpt-v2-generated', JSON.stringify(updated));
+    localStorage.setItem('catgpt-v-3-generated', JSON.stringify(updated));
 }
 
 function getSavedPrompts() {
     try {
-        const savedData = JSON.parse(localStorage.getItem('catgpt-v2-generated')) || [];
+        const savedData = JSON.parse(localStorage.getItem('catgpt-v-3-generated')) || [];
         
         // Handle backward compatibility with old format (strings instead of objects)
         return savedData.map(item => {
