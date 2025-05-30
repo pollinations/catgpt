@@ -54,35 +54,42 @@
         <div class="generator-section">
             <h2>✨ Create Your Meme</h2>
             
-            <div class="input-group">
-                <label for="userInput">What do you want to ask CatGPT?</label>
-                <textarea 
-                    id="userInput" 
-                    placeholder="e.g., What's the weather today? How do I cook pasta? What's the meaning of life?"
-                    rows="3"
-                ></textarea>
-            </div>
-
-            <div class="input-group">
-                <label for="imageUpload">Optional: Upload your own reference image</label>
-                
-                <!-- File input (visible when no image uploaded) -->
-                <div id="imageUploadContainer" class="upload-container">
+            <div class="input-container">
+                <div class="prompt-section">
+                    <label for="userInput">What do you want to ask CatGPT?</label>
                     <input 
-                        type="file" 
-                        id="imageUpload" 
-                        accept="image/*"
-                        class="image-upload-input"
+                        type="text" 
+                        id="userInput" 
+                        placeholder="e.g., What's the weather today? What's the meaning of life?"
                     />
-                    <p class="upload-note">Upload an image to use as a style reference (max 5MB)</p>
                 </div>
-                
-                <!-- Thumbnail preview (visible after upload) -->
-                <div id="imageThumbnailContainer" class="thumbnail-container hidden">
-                    <img id="imageThumbnail" class="image-thumbnail" alt="Uploaded image preview" />
-                    <button id="removeImageBtn" class="remove-image-btn" aria-label="Remove image">
-                        ✕
-                    </button>
+
+                <div class="upload-section">
+                    <label for="imageUpload">Upload image</label>
+                    
+                    <!-- File input (visible when no image uploaded) -->
+                    <div id="imageUploadContainer" class="upload-container">
+                        <div class="upload-button-wrapper">
+                            <label for="imageUpload" class="upload-button">
+                                🖼️ Choose Image
+                                <input 
+                                    type="file" 
+                                    id="imageUpload" 
+                                    accept="image/*"
+                                    class="image-upload-input"
+                                />
+                            </label>
+                            <p class="upload-note">5MB max</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Thumbnail preview (visible after upload) -->
+                    <div id="imageThumbnailContainer" class="thumbnail-container hidden">
+                        <img id="imageThumbnail" class="image-thumbnail" alt="Uploaded image preview" />
+                        <button id="removeImageBtn" class="remove-image-btn" aria-label="Remove image">
+                            ✕
+                        </button>
+                    </div>
                 </div>
             </div>
 
