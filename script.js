@@ -5,6 +5,99 @@ const POLLINATIONS_API = 'https://image.pollinations.ai/prompt';
 const ORIGINAL_CATGPT_IMAGE = 'https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png';
 const CATGPT_STYLE = 'Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.';
 
+// Cloudinary Configuration (Free unsigned upload)
+// To use this, create a free Cloudinary account and set up an unsigned upload preset
+const CLOUDINARY_CLOUD_NAME = 'pollinations'; // Your cloud name
+const CLOUDINARY_UPLOAD_PRESET = 'pollinations-image'; // Your unsigned preset
+const CLOUDINARY_API_KEY = '939386723511927'; // Cloudinary public API key
+
+// Image upload handler
+let uploadedImageUrl = null;
+
+// Convert file to base64 data URI (fallback for small images)
+function fileToDataURI(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Upload image to Cloudinary
+async function uploadToCloudinary(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    
+    // Add API key if available
+    if (CLOUDINARY_API_KEY) {
+        formData.append('api_key', CLOUDINARY_API_KEY);
+    }
+    
+    try {
+        const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+            {
+                method: 'POST',
+                body: formData
+            }
+        );
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Cloudinary error:', errorData);
+            throw new Error(`Upload failed: ${errorData.error?.message || 'Unknown error'}`);
+        }
+        
+        const data = await response.json();
+        return data.secure_url;
+    } catch (error) {
+        console.error('Cloudinary upload failed:', error);
+        throw error;
+    }
+}
+
+// Handle image upload
+async function handleImageUpload(file) {
+    if (!file) {
+        uploadedImageUrl = null;
+        return null;
+    }
+    
+    // Check file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        showNotification('Image too large! Please use an image under 5MB.', 'error');
+        return null;
+    }
+    
+    try {
+        // Try Cloudinary upload first (now using Pollinations account)
+        showNotification('Uploading image to Cloudinary...', 'info');
+        return await uploadToCloudinary(file);
+    } catch (error) {
+        console.error('Cloudinary upload failed:', error);
+        showNotification('Cloud upload failed. Trying local method...', 'warning');
+        
+        // Fallback to base64 if upload fails
+        try {
+            const dataUri = await fileToDataURI(file);
+            
+            // Warn if the data URI is too large (might cause issues with some browsers)
+            if (dataUri.length > 500000) { // ~500KB as base64 is larger than binary
+                showNotification('Image may be too large for reliable use. Results might vary.', 'warning');
+            }
+            
+            return dataUri;
+        } catch (fallbackError) {
+            showNotification('Could not process image. Please try a smaller image.', 'error');
+            console.error('Base64 fallback failed:', fallbackError);
+            return null;
+        }
+    }
+}
+
 // Single prompt template for consistent caching
 function createCatGPTPrompt(userQuestion) {
     return `Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.
@@ -51,7 +144,16 @@ const EXAMPLES = [
 
 // Utility functions for DRY principle
 function generateImageURL(prompt) {
-    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}`;
+    // If user uploaded an image, append it with a comma to the original image
+    // This allows using both the original style and the user's custom image
+    let imageParam;
+    if (uploadedImageUrl) {
+        // Encode each URL separately and join with comma
+        imageParam = `${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)},${encodeURIComponent(uploadedImageUrl)}`;
+    } else {
+        imageParam = encodeURIComponent(ORIGINAL_CATGPT_IMAGE);
+    }
+    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&image=${imageParam}&referrer=pollinations.github.io`;
 }
 
 // LocalStorage functions for user-generated memes
@@ -76,18 +178,43 @@ function getURLPrompt() {
     return urlParams.get('prompt');
 }
 
-function setURLPrompt(prompt) {
+// Get image URL from parameters
+function getURLImage() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('image');
+}
+
+function setURLPrompt(prompt, imageUrl = null) {
     const url = new URL(window.location);
+    
+    // Handle prompt parameter
     if (prompt) {
         url.searchParams.set('prompt', prompt);
+        
+        // Add image parameter if we have an uploaded image
+        if (uploadedImageUrl) {
+            url.searchParams.set('image', uploadedImageUrl);
+        } else {
+            url.searchParams.delete('image');
+        }
     } else {
         url.searchParams.delete('prompt');
+        url.searchParams.delete('image');
     }
+    
     window.history.replaceState({}, '', url);
 }
 
 function handleURLPrompt() {
     const urlPrompt = getURLPrompt();
+    const urlImage = getURLImage();
+    
+    // If there's an image URL in the parameters, use it and show thumbnail
+    if (urlImage) {
+        uploadedImageUrl = urlImage;
+        showThumbnail(urlImage);
+    }
+    
     if (urlPrompt) {
         userInput.value = urlPrompt;
         // Auto-generate the meme if prompt is in URL
@@ -107,9 +234,17 @@ const downloadBtn = document.getElementById('downloadBtn');
 const shareBtn = document.getElementById('shareBtn');
 const examplesGrid = document.getElementById('examplesGrid');
 
+// Image upload elements
+const imageUpload = document.getElementById('imageUpload');
+const imageUploadContainer = document.getElementById('imageUploadContainer');
+const imageThumbnailContainer = document.getElementById('imageThumbnailContainer');
+const imageThumbnail = document.getElementById('imageThumbnail');
+const removeImageBtn = document.getElementById('removeImageBtn');
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
-    loadExamples();
+    // Examples functionality temporarily commented out
+    // loadExamples();
     loadRandomCatFact();
     handleURLPrompt(); // Handle URL prompt if present
     
@@ -124,9 +259,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Add some fun to the page
+    // Image upload event listener
+    imageUpload.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            const fileName = file.name;
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            
+            // Show preview of selected file
+            const objectUrl = URL.createObjectURL(file);
+            showThumbnail(objectUrl);
+            
+            showNotification(`Selected: ${fileName} (${fileSize}MB)`, 'info');
+        } else {
+            uploadedImageUrl = null;
+            hideThumbnail();
+        }
+    });
+    
+    // Remove image button event listener
+    removeImageBtn.addEventListener('click', () => {
+        uploadedImageUrl = null;
+        imageUpload.value = '';
+        hideThumbnail();
+        showNotification('Image removed', 'info');
+    });
+    
+        // Add some fun to the page
     addFloatingEmojis();
 });
+
+// Show thumbnail preview of uploaded image
+function showThumbnail(imageUrl) {
+    // Set the thumbnail image source
+    imageThumbnail.src = imageUrl;
+    
+    // Show the thumbnail container and hide the file input
+    imageUploadContainer.classList.add('hidden');
+    imageThumbnailContainer.classList.remove('hidden');
+}
+
+// Hide thumbnail preview and show file input
+function hideThumbnail() {
+    // Clear the thumbnail image source
+    imageThumbnail.src = '';
+    
+    // Hide the thumbnail container and show the file input
+    imageThumbnailContainer.classList.add('hidden');
+    imageUploadContainer.classList.remove('hidden');
+}
 
 // Generate meme function
 async function generateMeme() {
@@ -136,6 +317,35 @@ async function generateMeme() {
         showNotification('Please enter a question for CatGPT! 😸', 'warning');
         return;
     }
+    
+    // Handle image upload if file selected
+    const imageFile = imageUpload.files[0];
+    
+    // Only try to upload a new image if there's a file in the input
+    // This preserves the existing uploadedImageUrl during retries
+    if (imageFile) {
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '📤 Uploading image...';
+        
+        try {
+            uploadedImageUrl = await handleImageUpload(imageFile);
+            if (!uploadedImageUrl) {
+                // Image upload failed, enable button and return
+                resetButton();
+                return;
+            }
+            
+            // Show thumbnail of the uploaded image
+            showThumbnail(uploadedImageUrl);
+        } catch (error) {
+            showNotification('Failed to upload image. Using default CatGPT style.', 'warning');
+            uploadedImageUrl = null;
+            hideThumbnail();
+        }
+    }
+    
+    // Debug log to confirm we still have the image URL
+    console.log('Using image URL:', uploadedImageUrl);
     
     // Update URL immediately when prompt is submitted
     setURLPrompt(userQuestion);
@@ -374,9 +584,17 @@ function stopCatAnimation() {
 // Reset button to original state
 function resetButton() {
     generateBtn.disabled = false;
-    generateBtn.innerHTML = 'Generate CatGPT Meme 🎨';
-    generateBtn.style.opacity = '1';
-    generateBtn.style.cursor = 'pointer';
+    generateBtn.innerHTML = `
+        <span class="btn-text">Generate Meme</span>
+        <span class="btn-emoji">🎨</span>
+    `;
+    generateBtn.style.opacity = '';
+    generateBtn.style.cursor = '';
+    
+    // Only clear the file input, but DON'T reset the uploadedImageUrl
+    // This allows the image URL to persist during retries
+    imageUpload.value = '';
+    
     loadingIndicator.classList.add('hidden');
     stopFakeProgress();
     stopCatAnimation(); // Stop the cat animation on reset
@@ -627,8 +845,6 @@ function celebrate() {
             emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
             emoji.style.cssText = `
                 position: fixed;
-                left: ${Math.random() * 100}%;
-                top: -50px;
                 font-size: ${20 + Math.random() * 20}px;
                 color: ${colors[Math.floor(Math.random() * colors.length)]};
                 animation: fall ${2 + Math.random() * 2}s ease-in forwards;

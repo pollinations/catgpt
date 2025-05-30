@@ -63,6 +63,29 @@
                 ></textarea>
             </div>
 
+            <div class="input-group">
+                <label for="imageUpload">Optional: Upload your own reference image</label>
+                
+                <!-- File input (visible when no image uploaded) -->
+                <div id="imageUploadContainer" class="upload-container">
+                    <input 
+                        type="file" 
+                        id="imageUpload" 
+                        accept="image/*"
+                        class="image-upload-input"
+                    />
+                    <p class="upload-note">Upload an image to use as a style reference (max 5MB)</p>
+                </div>
+                
+                <!-- Thumbnail preview (visible after upload) -->
+                <div id="imageThumbnailContainer" class="thumbnail-container hidden">
+                    <img id="imageThumbnail" class="image-thumbnail" alt="Uploaded image preview" />
+                    <button id="removeImageBtn" class="remove-image-btn" aria-label="Remove image">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
             <button id="generateBtn" class="generate-btn">
                 <span class="btn-text">Generate Meme</span>
                 <span class="btn-emoji">🎨</span>
@@ -89,12 +112,14 @@
             </div>
         </div>
 
+        <!-- Examples section temporarily commented out
         <div class="examples-section">
             <h2>🌟 Examples</h2>
             <div class="examples-grid" id="examplesGrid">
                 <!-- Examples will be loaded here -->
             </div>
         </div>
+        -->
 
         <div class="sponsor-section">
             <p class="sponsor-text">
