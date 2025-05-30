@@ -99,8 +99,9 @@ async function handleImageUpload(file) {
 }
 
 // Single prompt template for consistent caching
-function createCatGPTPrompt(userQuestion) {
-    return `Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.
+function createCatGPTPrompt(userQuestion, hasImage) {
+    const description = hasImage ? 'check reference image,': 'black bob hair, brick/burgundy sweater';
+    return `Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, ${description} (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.
 
 ---
 
@@ -386,8 +387,8 @@ async function generateMeme() {
     // Start cat animation during loading
     startCatAnimation();
     
-    // Create the full prompt using utility function
-    const fullPrompt = createCatGPTPrompt(userQuestion);
+    // Create the full prompt using utility function - pass if we have an uploaded image
+    const fullPrompt = createCatGPTPrompt(userQuestion, !!uploadedImageUrl);
     
     try {
         // Generate the image URL using utility function
@@ -772,7 +773,7 @@ function createExampleCard(promptData, index, isUserGenerated = false) {
     }
     
     // Generate dynamic image URL using utility functions
-    const examplePrompt = createCatGPTPrompt(promptValue);
+    const examplePrompt = createCatGPTPrompt(promptValue, !!customImageUrl);
     
     // If the example has a custom image URL, use it in generateImageURL
     let tempUploadedImageUrl = null;
