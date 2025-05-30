@@ -149,8 +149,9 @@ function generateImageURL(prompt) {
     // This allows using both the original style and the user's custom image
     let imageParam;
     if (uploadedImageUrl) {
-        // Encode each URL separately and join with comma
-        imageParam = `${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)},${encodeURIComponent(uploadedImageUrl)}`;
+        // Join URLs with comma first, then encode the entire string
+        // This ensures the comma is properly encoded as %2C
+        imageParam = encodeURIComponent(`${ORIGINAL_CATGPT_IMAGE},${uploadedImageUrl}`);
     } else {
         imageParam = encodeURIComponent(ORIGINAL_CATGPT_IMAGE);
     }
