@@ -173,12 +173,12 @@ function saveGeneratedPrompt(prompt) {
         ...saved.filter(item => item.prompt !== prompt)
     ].slice(0, 8);
     
-    localStorage.setItem('catgpt-generated', JSON.stringify(updated));
+    localStorage.setItem('catgpt-v2-generated', JSON.stringify(updated));
 }
 
 function getSavedPrompts() {
     try {
-        const savedData = JSON.parse(localStorage.getItem('catgpt-generated')) || [];
+        const savedData = JSON.parse(localStorage.getItem('catgpt-v2-generated')) || [];
         
         // Handle backward compatibility with old format (strings instead of objects)
         return savedData.map(item => {
