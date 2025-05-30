@@ -122,24 +122,24 @@ CatGPT:`;
 
 // Example memes for the gallery
 const EXAMPLES = [
-    "How many R's in strawberry?",
-    "running late...",
-    "I told the KGB about you",
-    "What's inside the washing machine?",
-    "What is my horoscope? I am gemini. And don't say napping",
-    "what is the answer to life and the universe?",
-    "Should I take up the offer for a new job?",
-    "Can you help me exercise?",
-    "Where should we eat in Palermo Sicily?",
-    "Why do boxes call to me?",
-    "Can you communicate with dolphins?",
-    "Why do keyboards attract fur?",
-    "What's the weather today?",
-    "How do I fix this bug?", 
-    "What should I eat for dinner?",
-    "What's the meaning of life?",
-    "How do I get motivated?",
-    "Why is my code not working?"
+    { prompt: "How many R's in strawberry?", imageUrl: null },
+    { prompt: "running late...", imageUrl: null },
+    { prompt: "I told the KGB about you", imageUrl: null },
+    { prompt: "What's inside the washing machine?", imageUrl: null },
+    { prompt: "What is my horoscope? I am gemini. And don't say napping", imageUrl: null },
+    { prompt: "what is the answer to life and the universe?", imageUrl: null },
+    { prompt: "Should I take up the offer for a new job?", imageUrl: null },
+    { prompt: "Can you help me exercise?", imageUrl: null },
+    { prompt: "Where should we eat in Palermo Sicily?", imageUrl: null },
+    { prompt: "Why do boxes call to me?", imageUrl: null },
+    { prompt: "Can you communicate with dolphins?", imageUrl: null },
+    { prompt: "Why do keyboards attract fur?", imageUrl: null },
+    { prompt: "What's the weather today?", imageUrl: null },
+    { prompt: "How do I fix this bug?", imageUrl: null },
+    { prompt: "What should I eat for dinner?", imageUrl: null },
+    { prompt: "What's the meaning of life?", imageUrl: null },
+    { prompt: "How do I get motivated?", imageUrl: null },
+    { prompt: "Why is my code not working?", imageUrl: null }
 ];
 
 // Utility functions for DRY principle
@@ -740,13 +740,8 @@ function loadExamples() {
     // Get saved prompts and combine with default examples
     const savedPrompts = getSavedPrompts();
     
-    // Convert default examples to new format (objects with prompt and imageUrl)
-    const defaultExamples = EXAMPLES.map(example => {
-        return typeof example === 'string' ? { prompt: example, imageUrl: null } : example;
-    });
-    
-    // Combine saved prompts with default examples
-    const allPrompts = [...savedPrompts, ...defaultExamples];
+    // Combine saved prompts with default examples (now both using the same object format)
+    const allPrompts = [...savedPrompts, ...EXAMPLES];
     
     // Create cards for each prompt
     allPrompts.forEach((promptData, index) => {
