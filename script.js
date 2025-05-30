@@ -100,7 +100,7 @@ async function handleImageUpload(file) {
 
 // Single prompt template for consistent caching
 function createCatGPTPrompt(userQuestion, hasImage) {
-    const description = hasImage ? 'caricature of attached photo,': 'black bob hair, brick/burgundy sweater';
+    const description = hasImage ? 'check reference image,': 'black bob hair, brick/burgundy sweater';
     return `Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, ${description} (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.
 
 ---
@@ -276,8 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     shareBtn.addEventListener('click', shareMeme);
     
     userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
+        if (e.key === 'Enter') {
             generateMeme();
         }
     });
@@ -289,14 +288,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const fileName = file.name;
             const fileSize = (file.size / 1024 / 1024).toFixed(2);
             
-            // Process the uploaded image
-            handleImageUpload(file).then(url => {
-                if (url) {
-                    uploadedImageUrl = url;
-                    showThumbnail(url);
-                    showNotification(`Selected: ${fileName} (${fileSize}MB)`, 'info');
-                }
-            });
+            // Show preview of selected file
+            const objectUrl = URL.createObjectURL(file);
+            showThumbnail(objectUrl);
+            
+            showNotification(`Selected: ${fileName} (${fileSize}MB)`, 'info');
         } else {
             uploadedImageUrl = null;
             hideThumbnail();
@@ -311,60 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showNotification('Image removed', 'info');
     });
     
-    // Drag and drop functionality
-    const dropZone = document.querySelector('.drop-zone');
-    if (dropZone) {
-        // Prevent default behavior for all drag events to enable drop
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, preventDefaults, false);
-        });
-        
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        // Add/remove visual indicator when dragging
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, highlight, false);
-        });
-        
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, unhighlight, false);
-        });
-        
-        function highlight() {
-            dropZone.classList.add('drag-over');
-        }
-        
-        function unhighlight() {
-            dropZone.classList.remove('drag-over');
-        }
-        
-        // Handle the dropped files
-        dropZone.addEventListener('drop', handleDrop, false);
-        
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const file = dt.files[0];
-            
-            if (file) {
-                const fileName = file.name;
-                const fileSize = (file.size / 1024 / 1024).toFixed(2);
-                
-                // Process the dropped image
-                handleImageUpload(file).then(url => {
-                    if (url) {
-                        uploadedImageUrl = url;
-                        showThumbnail(url);
-                        showNotification(`Dropped: ${fileName} (${fileSize}MB)`, 'info');
-                    }
-                });
-            }
-        }
-    }
-    
-    // Add some fun to the page
+        // Add some fun to the page
     addFloatingEmojis();
 });
 
@@ -374,8 +317,8 @@ function showThumbnail(imageUrl) {
     imageThumbnail.src = imageUrl;
     
     // Show the thumbnail container and hide the file input
-    imageThumbnailContainer.classList.remove('hidden');
     imageUploadContainer.classList.add('hidden');
+    imageThumbnailContainer.classList.remove('hidden');
 }
 
 // Hide thumbnail preview and show file input
