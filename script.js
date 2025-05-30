@@ -395,31 +395,31 @@ async function generateMeme() {
         
         // Create a new image element to handle loading
         const img = new Image();
-        let imageLoadTimeout;
         
         img.onload = () => {
-            clearTimeout(imageLoadTimeout);
+            // Update UI with generated image
             generatedMeme.src = imageUrl;
-            showResult();
+            generatedMeme.alt = `CatGPT response to: ${userQuestion}`;
+            
+            // Show result section
+            loadingIndicator.classList.add('hidden');
+            resultSection.classList.remove('hidden');
             resetButton();
-            stopCatAnimation(); // Stop the cat animation on success
-            // Save this prompt to localStorage and refresh examples
+            
+            // Save the prompt for future examples
             saveGeneratedPrompt(userQuestion);
-            refreshExamples();
-            // URL already updated at the beginning
+            
+            // Add a little celebration
+            celebrate();
         };
         
         img.onerror = () => {
-            clearTimeout(imageLoadTimeout);
+            // Image failed to load, trigger retry system
+            console.log('Image failed to load, triggering retry');
             resetButton();
-            handleImageError();
+            // Start the retry countdown
+            startRetryCountdown();
         };
-        
-        // Set timeout for slow/failed loading (45 seconds)
-        imageLoadTimeout = setTimeout(() => {
-            resetButton();
-            handleImageError('timeout');
-        }, 45000);
         
         img.src = imageUrl;
         
