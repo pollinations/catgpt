@@ -159,14 +159,36 @@ function generateImageURL(prompt) {
 // LocalStorage functions for user-generated memes
 function saveGeneratedPrompt(prompt) {
     const saved = getSavedPrompts();
+    
+    // Create object with prompt and image URL (if exists)
+    const promptData = {
+        prompt: prompt,
+        imageUrl: uploadedImageUrl || null
+    };
+    
     // Add to beginning, remove duplicates, limit to 8 items
-    const updated = [prompt, ...saved.filter(p => p !== prompt)].slice(0, 8);
+    // Check if prompt text already exists to avoid duplicates
+    const updated = [
+        promptData, 
+        ...saved.filter(item => item.prompt !== prompt)
+    ].slice(0, 8);
+    
     localStorage.setItem('catgpt-generated', JSON.stringify(updated));
 }
 
 function getSavedPrompts() {
     try {
-        return JSON.parse(localStorage.getItem('catgpt-generated')) || [];
+        const savedData = JSON.parse(localStorage.getItem('catgpt-generated')) || [];
+        
+        // Handle backward compatibility with old format (strings instead of objects)
+        return savedData.map(item => {
+            // If the item is a string (old format), convert to object format
+            if (typeof item === 'string') {
+                return { prompt: item, imageUrl: null };
+            }
+            // Otherwise return the item as is (already in object format)
+            return item;
+        });
     } catch {
         return [];
     }
@@ -243,8 +265,7 @@ const removeImageBtn = document.getElementById('removeImageBtn');
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
-    // Examples functionality temporarily commented out
-    // loadExamples();
+    loadExamples();
     loadRandomCatFact();
     handleURLPrompt(); // Handle URL prompt if present
     
@@ -718,10 +739,18 @@ function loadExamples() {
     
     // Get saved prompts and combine with default examples
     const savedPrompts = getSavedPrompts();
-    const allPrompts = [...savedPrompts, ...EXAMPLES];
     
-    allPrompts.forEach((prompt, index) => {
-        const card = createExampleCard(prompt, index, index < savedPrompts.length);
+    // Convert default examples to new format (objects with prompt and imageUrl)
+    const defaultExamples = EXAMPLES.map(example => {
+        return typeof example === 'string' ? { prompt: example, imageUrl: null } : example;
+    });
+    
+    // Combine saved prompts with default examples
+    const allPrompts = [...savedPrompts, ...defaultExamples];
+    
+    // Create cards for each prompt
+    allPrompts.forEach((promptData, index) => {
+        const card = createExampleCard(promptData, index, index < savedPrompts.length);
         examplesGrid.appendChild(card);
     });
 }
@@ -732,7 +761,11 @@ function refreshExamples() {
 }
 
 // Create example card
-function createExampleCard(prompt, index, isUserGenerated = false) {
+function createExampleCard(promptData, index, isUserGenerated = false) {
+    // Handle both new format (object with prompt and imageUrl) and old format (string)
+    const promptValue = typeof promptData === 'string' ? promptData : promptData.prompt;
+    const customImageUrl = typeof promptData === 'object' ? promptData.imageUrl : null;
+    
     const card = document.createElement('div');
     card.className = 'example-card';
     card.style.animationDelay = `${index * 0.1}s`;
@@ -744,21 +777,37 @@ function createExampleCard(prompt, index, isUserGenerated = false) {
     }
     
     // Generate dynamic image URL using utility functions
-    const examplePrompt = createCatGPTPrompt(prompt);
+    const examplePrompt = createCatGPTPrompt(promptValue);
+    
+    // If the example has a custom image URL, use it in generateImageURL
+    let tempUploadedImageUrl = null;
+    if (customImageUrl) {
+        // Temporarily save the current uploadedImageUrl
+        tempUploadedImageUrl = uploadedImageUrl;
+        // Set uploadedImageUrl to the example's custom image
+        uploadedImageUrl = customImageUrl;
+    }
+    
+    // Generate the image URL (this will use uploadedImageUrl if set)
     const imageUrl = generateImageURL(examplePrompt);
+    
+    // Restore the original uploadedImageUrl if we modified it
+    if (customImageUrl) {
+        uploadedImageUrl = tempUploadedImageUrl;
+    }
     
     const img = document.createElement('img');
     img.src = imageUrl;
-    img.alt = prompt;
+    img.alt = promptValue;
     img.loading = 'lazy';
     
-    const promptText = document.createElement('p');
-    promptText.textContent = `"${prompt}"`;
-    promptText.style.fontStyle = 'italic';
-    promptText.style.fontSize = '0.9rem';
-    promptText.style.color = 'var(--color-primary)';
-    promptText.style.textAlign = 'center';
-    promptText.style.margin = '0.5rem 0';
+    const promptElement = document.createElement('p');
+    promptElement.textContent = `"${promptValue}"`;
+    promptElement.style.fontStyle = 'italic';
+    promptElement.style.fontSize = '0.9rem';
+    promptElement.style.color = 'var(--color-primary)';
+    promptElement.style.textAlign = 'center';
+    promptElement.style.margin = '0.5rem 0';
     
     // Add "Your Meme" badge for user-generated content
     if (isUserGenerated) {
@@ -778,13 +827,42 @@ function createExampleCard(prompt, index, isUserGenerated = false) {
     }
     
     card.appendChild(img);
-    card.appendChild(promptText);
+    card.appendChild(promptElement);
     
-    // Click to use this prompt
+    // Add image icon badge if it has a custom image
+    if (customImageUrl) {
+        const imageBadge = document.createElement('div');
+        imageBadge.textContent = '🖼️ Custom Image';
+        imageBadge.style.cssText = `
+            background: var(--gradient-2);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+            text-align: center;
+        `;
+        card.appendChild(imageBadge);
+    }
+    
+    // Click to use this prompt and image (if available)
     card.addEventListener('click', () => {
-        userInput.value = prompt;
+        // Set the prompt text in the input
+        userInput.value = promptValue;
         userInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         userInput.focus();
+        
+        // Set the image URL if this example has one
+        if (customImageUrl) {
+            uploadedImageUrl = customImageUrl;
+            showThumbnail(customImageUrl);
+            showNotification('Using custom image from example 🖼️', 'info');
+        } else {
+            // If no custom image, clear any existing one
+            uploadedImageUrl = null;
+            hideThumbnail();
+        }
         
         // Add a little animation to the input
         userInput.style.animation = 'pulse 0.5s';
