@@ -1,125 +1,13 @@
 // CatGPT Meme Generator Script 🐱✨
-
-// Constants
-const POLLINATIONS_API = 'https://image.pollinations.ai/prompt';
-const ORIGINAL_CATGPT_IMAGE = 'https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png';
-
-
-// Cloudinary Configuration (Free unsigned upload)
-// To use this, create a free Cloudinary account and set up an unsigned upload preset
-const CLOUDINARY_CLOUD_NAME = 'pollinations'; // Your cloud name
-const CLOUDINARY_UPLOAD_PRESET = 'pollinations-image'; // Your unsigned preset
-const CLOUDINARY_API_KEY = '939386723511927'; // Cloudinary public API key
+// Note: AI functionality is now provided by ai.js
 
 // Image upload handler
 let uploadedImageUrl = null;
 
-// Convert file to base64 data URI (fallback for small images)
-function fileToDataURI(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
+// Image upload functions are now provided by ai.js
+// Using handleImageUpload from ai.js with showNotification callback
 
-// Upload image to Cloudinary
-async function uploadToCloudinary(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    
-    // Add API key if available
-    if (CLOUDINARY_API_KEY) {
-        formData.append('api_key', CLOUDINARY_API_KEY);
-    }
-    
-    try {
-        const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-            {
-                method: 'POST',
-                body: formData
-            }
-        );
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Cloudinary error:', errorData);
-            throw new Error(`Upload failed: ${errorData.error?.message || 'Unknown error'}`);
-        }
-        
-        const data = await response.json();
-        return data.secure_url;
-    } catch (error) {
-        console.error('Cloudinary upload failed:', error);
-        throw error;
-    }
-}
-
-// Handle image upload
-async function handleImageUpload(file) {
-    if (!file) {
-        uploadedImageUrl = null;
-        return null;
-    }
-    
-    // Check file size (5MB limit)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-        showNotification('Image too large! Please use an image under 5MB.', 'error');
-        return null;
-    }
-    
-    try {
-        // Try Cloudinary upload first (now using Pollinations account)
-        showNotification('Uploading image to Cloudinary...', 'info');
-        return await uploadToCloudinary(file);
-    } catch (error) {
-        console.error('Cloudinary upload failed:', error);
-        showNotification('Cloud upload failed. Trying local method...', 'warning');
-        
-        // Fallback to base64 if upload fails
-        try {
-            const dataUri = await fileToDataURI(file);
-            
-            // Warn if the data URI is too large (might cause issues with some browsers)
-            if (dataUri.length > 500000) { // ~500KB as base64 is larger than binary
-                showNotification('Image may be too large for reliable use. Results might vary.', 'warning');
-            }
-            
-            return dataUri;
-        } catch (fallbackError) {
-            showNotification('Could not process image. Please try a smaller image.', 'error');
-            console.error('Base64 fallback failed:', fallbackError);
-            return null;
-        }
-    }
-}
-
-// Single prompt template for consistent caching
-function createCatGPTPrompt(userQuestion, hasImage) {
-    const description = hasImage ? 'replace the person on the left with the person in the second image, incorporate visible elements or landmarks from the second image, caricature,': 'black bob hair, brick/burgundy sweater';
-    return `Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, ${description} (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.
-
----
-
-You are **CatGPT** – an aloof, self-important house-cat oracle.
-
-Guidelines
-•  Replies: one or two crisp sentences, no filler.  
-•  Tone: detached, sardonic, subtly superior.  
-•  Cats outrank humans; human problems = minor curiosities.  
-•  When self-referential, be unpredictable and natural.
-•  Offer a curt "solution" or dismissal, then redirect to feline perspective.  
-•  Never apologise or over-explain; indifference is charm.
-
----
-
-Human asks: "${userQuestion}"
-CatGPT:`;
-}
+// CatGPT prompt creation is now provided by ai.js
 
 // Example memes for the gallery
 const EXAMPLES = [
@@ -143,20 +31,8 @@ const EXAMPLES = [
     { prompt: "Why is my code not working?", imageUrl: null }
 ];
 
-// Utility functions for DRY principle
-function generateImageURL(prompt) {
-    // If user uploaded an image, append it with a comma to the original image
-    // This allows using both the original style and the user's custom image
-    let imageParam;
-    if (uploadedImageUrl) {
-        // Join URLs with comma first, then encode the entire string
-        // This ensures the comma is properly encoded as %2C
-        imageParam = encodeURIComponent(`${ORIGINAL_CATGPT_IMAGE},${uploadedImageUrl}`);
-    } else {
-        imageParam = encodeURIComponent(ORIGINAL_CATGPT_IMAGE);
-    }
-    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=nanobanana&image=${imageParam}&referrer=pollinations.github.io&quality=high`;
-}
+// Image URL generation is now provided by ai.js
+// Note: Using generateImageURL(prompt, uploadedImageUrl) from ai.js
 
 // LocalStorage functions for user-generated memes
 function saveGeneratedPrompt(prompt) {
@@ -351,7 +227,7 @@ async function generateMeme() {
         generateBtn.innerHTML = '📤 Uploading image...';
         
         try {
-            uploadedImageUrl = await handleImageUpload(imageFile);
+            uploadedImageUrl = await handleImageUpload(imageFile, showNotification);
             if (!uploadedImageUrl) {
                 // Image upload failed, enable button and return
                 resetButton();
@@ -392,8 +268,8 @@ async function generateMeme() {
     const fullPrompt = createCatGPTPrompt(userQuestion, !!uploadedImageUrl);
     
     try {
-        // Generate the image URL using utility function
-        const imageUrl = generateImageURL(fullPrompt);
+        // Generate the image URL using utility function from ai.js
+        const imageUrl = generateImageURL(fullPrompt, uploadedImageUrl);
         
         // Create a new image element to handle loading
         const img = new Image();
@@ -785,8 +661,8 @@ function createExampleCard(promptData, index, isUserGenerated = false) {
         uploadedImageUrl = customImageUrl;
     }
     
-    // Generate the image URL (this will use uploadedImageUrl if set)
-    const imageUrl = generateImageURL(examplePrompt);
+    // Generate the image URL using ai.js function
+    const imageUrl = generateImageURL(examplePrompt, customImageUrl);
     
     // Restore the original uploadedImageUrl if we modified it
     if (customImageUrl) {
