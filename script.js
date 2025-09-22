@@ -155,7 +155,7 @@ function generateImageURL(prompt) {
     } else {
         imageParam = encodeURIComponent(ORIGINAL_CATGPT_IMAGE);
     }
-    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&image=${imageParam}&referrer=pollinations.github.io`;
+    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=nanobanana&image=${imageParam}&referrer=pollinations.github.io&quality=high`;
 }
 
 // LocalStorage functions for user-generated memes
