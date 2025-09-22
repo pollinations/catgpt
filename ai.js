@@ -57,7 +57,7 @@ function generateImageURL(prompt, uploadedImageUrl = null) {
     } else {
         imageParam = encodeURIComponent(ORIGINAL_CATGPT_IMAGE);
     }
-    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=kontext&image=${imageParam}&referrer=pollinations.github.io&quality=high`;
+    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=nanobanana&image=${imageParam}&referrer=pollinations.github.io&quality=high`;
 }
 
 /**
