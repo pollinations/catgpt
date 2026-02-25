@@ -39,11 +39,12 @@
 
         <div class="intro-section">
             <p class="intro-text">
-                A collab with <a href="https://www.instagram.com/tanikagodbole/" target="_blank" rel="noopener">Tanika Godbole</a>, 
+                A collab with <a href="https://www.instagram.com/missfitcomics/" target="_blank" rel="noopener">Tanika Godbole</a>, 
                 the original CatGPT creator! 🎨
             </p>
             <p class="intro-text small">
                 Powered by <a href="https://pollinations.ai" target="_blank" rel="noopener">Pollinations.AI</a> 🐝
+                | <a href="https://github.com/pollinations/catgpt" target="_blank" rel="noopener">Open Source</a> 🌟
             </p>
         </div>
 
@@ -57,6 +58,29 @@
                     placeholder="e.g., What's the weather today? How do I cook pasta? What's the meaning of life?"
                     rows="3"
                 ></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="imageUpload">Optional: Upload your own reference image</label>
+                
+                <!-- File input (visible when no image uploaded) -->
+                <div id="imageUploadContainer" class="upload-container">
+                    <input 
+                        type="file" 
+                        id="imageUpload" 
+                        accept="image/*"
+                        class="image-upload-input"
+                    />
+                    <p class="upload-note">Upload an image to use as a style reference (max 5MB)</p>
+                </div>
+                
+                <!-- Thumbnail preview (visible after upload) -->
+                <div id="imageThumbnailContainer" class="thumbnail-container hidden">
+                    <img id="imageThumbnail" class="image-thumbnail" alt="Uploaded image preview" />
+                    <button id="removeImageBtn" class="remove-image-btn" aria-label="Remove image">
+                        ✕
+                    </button>
+                </div>
             </div>
 
             <button id="generateBtn" class="generate-btn">
@@ -106,10 +130,14 @@
 
         <footer>
             <p>Made with 💜 by <a href="https://pollinations.ai" target="_blank" rel="noopener">Pollinations.AI</a></p>
-            <p class="footer-small">Original CatGPT comic by <a href="https://www.instagram.com/tanikagodbole/" target="_blank" rel="noopener">Tanika Godbole</a></p>
+            <p class="footer-small">Original CatGPT comic by <a href="https://www.instagram.com/missfitcomics/" target="_blank" rel="noopener">Tanika Godbole</a></p>
+            <p class="footer-small">
+                <a href="https://github.com/pollinations/catgpt" target="_blank" rel="noopener">View on GitHub</a> 🐙
+            </p>
         </footer>
     </div>
 
-    <script src="script.js"></script>
+    <script src="ai.js"></script>
+    <script src="script.js?v=20250530"></script>
 </body>
 </html>
