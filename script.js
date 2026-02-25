@@ -203,7 +203,7 @@ async function generateMeme() {
         imageLoadTimeout = setTimeout(() => {
             resetButton();
             handleImageError('timeout');
-        }, 45000);
+        }, 60000);
         
         try {
             const blobUrl = await fetchImageWithAuth(imageUrl);
