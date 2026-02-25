@@ -47,6 +47,21 @@ function generateImageURL(prompt) {
     return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}&seed=${Date.now()}`;
 }
 
+async function fetchImageWithAuth(imageUrl) {
+    const response = await fetch(imageUrl, {
+        headers: {
+            'Authorization': 'Bearer pk_w3kAO902fOeFYiNm'
+        }
+    });
+    
+    if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.status}`);
+    }
+    
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+}
+
 function saveGeneratedPrompt(prompt) {
     const saved = getSavedPrompts();
     const updated = [prompt, ...saved.filter(p => p !== prompt)].slice(0, 8);
@@ -139,31 +154,28 @@ async function generateMeme() {
     try {
         const imageUrl = generateImageURL(fullPrompt);
         
-        const img = new Image();
         let imageLoadTimeout;
-        
-        img.onload = () => {
-            clearTimeout(imageLoadTimeout);
-            generatedMeme.src = imageUrl;
-            showResult();
-            resetButton();
-            stopCatAnimation();
-            saveGeneratedPrompt(userQuestion);
-            refreshExamples();
-        };
-        
-        img.onerror = () => {
-            clearTimeout(imageLoadTimeout);
-            resetButton();
-            handleImageError();
-        };
         
         imageLoadTimeout = setTimeout(() => {
             resetButton();
             handleImageError('timeout');
         }, 45000);
         
-        img.src = imageUrl;
+        try {
+            const blobUrl = await fetchImageWithAuth(imageUrl);
+            clearTimeout(imageLoadTimeout);
+            generatedMeme.src = blobUrl;
+            showResult();
+            resetButton();
+            stopCatAnimation();
+            saveGeneratedPrompt(userQuestion);
+            refreshExamples();
+        } catch (fetchError) {
+            clearTimeout(imageLoadTimeout);
+            console.error('Error fetching image:', fetchError);
+            resetButton();
+            handleImageError();
+        }
         
     } catch (error) {
         console.error('Error generating meme:', error);
