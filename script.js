@@ -49,13 +49,14 @@ function generateImageURL(prompt) {
 
 async function fetchImageWithAuth(imageUrl) {
     const response = await fetch(imageUrl, {
+        method: 'GET',
         headers: {
             'Authorization': 'Bearer pk_w3kAO902fOeFYiNm'
         }
     });
     
     if (!response.ok) {
-        throw new Error(`Failed to fetch image: ${response.status}`);
+        throw new Error(`API Error ${response.status}: ${response.statusText}`);
     }
     
     const blob = await response.blob();
