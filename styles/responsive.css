@@ -23,11 +23,13 @@
     }
 
     .examples-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 
     .your-memes-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 
     .intro-text {
@@ -96,6 +98,12 @@
 
     .examples-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .your-memes-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
     .your-memes-grid {
