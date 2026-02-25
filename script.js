@@ -1,6 +1,3 @@
-// CatGPT Meme Generator Script 🐱✨
-
-// Constants
 const POLLINATIONS_API = 'https://gen.pollinations.ai/image/';
 const ORIGINAL_CATGPT_IMAGE = 'https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png';
 const CATGPT_STYLE = 'Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.';
@@ -14,7 +11,6 @@ Guidelines
 •  Offer a curt "solution" or dismissal, then redirect to feline perspective.  
 •  Never apologise or over-explain; indifference is charm.`;
 
-// Example memes for the gallery
 const EXAMPLES = [
     "What's inside the washing machine?",
     "What is my horoscope? I am gemini. And don't say napping",
@@ -33,7 +29,6 @@ const EXAMPLES = [
     "Why is my code not working?"
 ];
 
-// Utility functions for DRY principle
 function createCatGPTPrompt(userQuestion) {
     return `${CATGPT_STYLE}
 
@@ -51,10 +46,8 @@ function generateImageURL(prompt) {
     return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&token=catgpt&referrer=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}`;
 }
 
-// LocalStorage functions for user-generated memes
 function saveGeneratedPrompt(prompt) {
     const saved = getSavedPrompts();
-    // Add to beginning, remove duplicates, limit to 8 items
     const updated = [prompt, ...saved.filter(p => p !== prompt)].slice(0, 8);
     localStorage.setItem('catgpt-generated', JSON.stringify(updated));
 }
@@ -67,7 +60,6 @@ function getSavedPrompts() {
     }
 }
 
-// URL parameter handling for shared prompts
 function getURLPrompt() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('prompt');
@@ -87,14 +79,12 @@ function handleURLPrompt() {
     const urlPrompt = getURLPrompt();
     if (urlPrompt) {
         userInput.value = urlPrompt;
-        // Auto-generate the meme if prompt is in URL
         setTimeout(() => {
             generateMeme();
         }, 500);
     }
 }
 
-// DOM Elements
 const userInput = document.getElementById('userInput');
 const generateBtn = document.getElementById('generateBtn');
 const loadingIndicator = document.getElementById('loadingIndicator');
@@ -104,13 +94,11 @@ const downloadBtn = document.getElementById('downloadBtn');
 const shareBtn = document.getElementById('shareBtn');
 const examplesGrid = document.getElementById('examplesGrid');
 
-// Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     loadExamples();
     loadRandomCatFact();
-    handleURLPrompt(); // Handle URL prompt if present
+    handleURLPrompt();
     
-    // Add event listeners
     generateBtn.addEventListener('click', generateMeme);
     downloadBtn.addEventListener('click', downloadMeme);
     shareBtn.addEventListener('click', shareMeme);
@@ -121,11 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Add some fun to the page
     addFloatingEmojis();
 });
 
-// Generate meme function
 async function generateMeme() {
     const userQuestion = userInput.value.trim();
     
@@ -134,10 +120,8 @@ async function generateMeme() {
         return;
     }
     
-    // Update URL immediately when prompt is submitted
     setURLPrompt(userQuestion);
     
-    // Show loading state with disabled button
     generateBtn.disabled = true;
     generateBtn.innerHTML = '🐾 Generating... (~30s)';
     generateBtn.style.opacity = '0.6';
@@ -146,20 +130,14 @@ async function generateMeme() {
     loadingIndicator.classList.remove('hidden');
     resultSection.classList.add('hidden');
     
-    // Start fake Gen-Z progress
     startFakeProgress();
-    
-    // Start cat animation during loading
     startCatAnimation();
     
-    // Create the full prompt using utility function
     const fullPrompt = createCatGPTPrompt(userQuestion);
     
     try {
-        // Generate the image URL using utility function
         const imageUrl = generateImageURL(fullPrompt);
         
-        // Create a new image element to handle loading
         const img = new Image();
         let imageLoadTimeout;
         
@@ -168,11 +146,9 @@ async function generateMeme() {
             generatedMeme.src = imageUrl;
             showResult();
             resetButton();
-            stopCatAnimation(); // Stop the cat animation on success
-            // Save this prompt to localStorage and refresh examples
+            stopCatAnimation();
             saveGeneratedPrompt(userQuestion);
             refreshExamples();
-            // URL already updated at the beginning
         };
         
         img.onerror = () => {
@@ -181,7 +157,6 @@ async function generateMeme() {
             handleImageError();
         };
         
-        // Set timeout for slow/failed loading (45 seconds)
         imageLoadTimeout = setTimeout(() => {
             resetButton();
             handleImageError('timeout');
@@ -196,7 +171,6 @@ async function generateMeme() {
     }
 }
 
-// Handle image loading errors with funny cat messages
 function handleImageError(errorType = 'general') {
     const catMessages = [
         "😾 *yawns* The art studio is full of sleeping cats... try again in 30 seconds!",
@@ -219,17 +193,14 @@ function handleImageError(errorType = 'general') {
     }
     
     showNotification(specificMessage, 'error');
-    stopCatAnimation(); // Stop the cat animation on error
+    stopCatAnimation();
     
-    // Start automatic retry countdown
     startRetryCountdown();
 }
 
-// Auto-retry with Gen-Z countdown
 function startRetryCountdown() {
     let countdown = 10;
     
-    // Start different cat animation for retry state
     startCatAnimation('retry');
     
     const retryContainer = document.createElement('div');
@@ -297,7 +268,6 @@ function startRetryCountdown() {
     retryContainer.appendChild(cancelBtn);
     document.body.appendChild(retryContainer);
     
-    // Countdown timer
     const countdownInterval = setInterval(() => {
         countdown--;
         countdownDisplay.textContent = countdown;
@@ -305,24 +275,20 @@ function startRetryCountdown() {
         if (countdown <= 0) {
             clearInterval(countdownInterval);
             retryContainer.remove();
-            stopCatAnimation(); // Stop retry cats
-            // Auto-retry
+            stopCatAnimation();
             generateMeme();
         }
     }, 1000);
     
-    // Cancel button
     cancelBtn.addEventListener('click', () => {
         clearInterval(countdownInterval);
         retryContainer.remove();
-        stopCatAnimation(); // Stop retry cats when cancelled
+        stopCatAnimation();
     });
     
-    // Initial countdown display
     countdownDisplay.textContent = countdown;
 }
 
-// Cat animation during loading
 let catAnimationInterval;
 
 function startCatAnimation(mode = 'loading') {
@@ -330,7 +296,7 @@ function startCatAnimation(mode = 'loading') {
     const retryCatEmojis = ['😾', '😿', '🙄', '😤', '😑', '😒', '😔', '🐱‍👤', '😸', '😼'];
     
     const catEmojis = mode === 'retry' ? retryCatEmojis : loadingCatEmojis;
-    const speed = mode === 'retry' ? 800 : 400; // Slower for retry state
+    const speed = mode === 'retry' ? 800 : 400;
     
     catAnimationInterval = setInterval(() => {
         const cat = document.createElement('div');
@@ -349,7 +315,6 @@ function startCatAnimation(mode = 'loading') {
         cat.textContent = catEmojis[Math.floor(Math.random() * catEmojis.length)];
         document.body.appendChild(cat);
         
-        // Remove after animation
         setTimeout(() => {
             if (cat.parentNode) {
                 cat.remove();
@@ -364,11 +329,9 @@ function stopCatAnimation() {
         catAnimationInterval = null;
     }
     
-    // Remove any existing cats
     document.querySelectorAll('[style*="catSlide"]').forEach(cat => cat.remove());
 }
 
-// Reset button to original state
 function resetButton() {
     generateBtn.disabled = false;
     generateBtn.innerHTML = 'Generate CatGPT Meme 🎨';
@@ -376,10 +339,9 @@ function resetButton() {
     generateBtn.style.cursor = 'pointer';
     loadingIndicator.classList.add('hidden');
     stopFakeProgress();
-    stopCatAnimation(); // Stop the cat animation on reset
+    stopCatAnimation();
 }
 
-// Fake Gen-Z progress messages
 let progressInterval;
 let progressStep = 0;
 
@@ -413,7 +375,6 @@ function startFakeProgress() {
     
     loadingIndicator.appendChild(progressText);
     
-    // Update progress every 2.5 seconds
     progressInterval = setInterval(() => {
         if (progressStep < progressMessages.length) {
             progressText.textContent = progressMessages[progressStep];
@@ -423,7 +384,6 @@ function startFakeProgress() {
         }
     }, 2500);
     
-    // Start with first message immediately
     progressText.textContent = progressMessages[0];
     progressStep = 1;
 }
@@ -439,18 +399,14 @@ function stopFakeProgress() {
     }
 }
 
-// Show the result
 function showResult() {
     resultSection.classList.remove('hidden');
     
-    // Smooth scroll to result
     resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
     
-    // Add celebration animation
     celebrate();
 }
 
-// Download meme
 async function downloadMeme() {
     try {
         const response = await fetch(generatedMeme.src);
@@ -479,7 +435,6 @@ async function shareMeme() {
     const currentURL = window.location.href;
     
     try {
-        // Copy URL to clipboard
         await navigator.clipboard.writeText(currentURL);
         showNotification('Link copied to clipboard! 📋', 'success');
     } catch (error) {
@@ -490,12 +445,9 @@ async function shareMeme() {
 
 
 
-// Load example memes
 function loadExamples() {
-    // Clear existing examples
     examplesGrid.innerHTML = '';
     
-    // Get saved prompts and combine with default examples
     const savedPrompts = getSavedPrompts();
     const allPrompts = [...savedPrompts, ...EXAMPLES];
     
@@ -505,24 +457,20 @@ function loadExamples() {
     });
 }
 
-// Refresh examples (useful after generating new memes)
 function refreshExamples() {
     loadExamples();
 }
 
-// Create example card
 function createExampleCard(prompt, index, isUserGenerated = false) {
     const card = document.createElement('div');
     card.className = 'example-card';
     card.style.animationDelay = `${index * 0.1}s`;
     
-    // Add special styling for user-generated prompts
     if (isUserGenerated) {
         card.style.border = '2px solid var(--color-accent)';
         card.style.boxShadow = '0 0 10px rgba(255, 105, 180, 0.3)';
     }
     
-    // Generate dynamic image URL using utility functions
     const examplePrompt = createCatGPTPrompt(prompt);
     const imageUrl = generateImageURL(examplePrompt);
     
@@ -539,7 +487,6 @@ function createExampleCard(prompt, index, isUserGenerated = false) {
     promptText.style.textAlign = 'center';
     promptText.style.margin = '0.5rem 0';
     
-    // Add "Your Meme" badge for user-generated content
     if (isUserGenerated) {
         const badge = document.createElement('div');
         badge.textContent = '✨ Your Meme';
@@ -559,13 +506,11 @@ function createExampleCard(prompt, index, isUserGenerated = false) {
     card.appendChild(img);
     card.appendChild(promptText);
     
-    // Click to use this prompt
     card.addEventListener('click', () => {
         userInput.value = prompt;
         userInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         userInput.focus();
         
-        // Add a little animation to the input
         userInput.style.animation = 'pulse 0.5s';
         setTimeout(() => {
             userInput.style.animation = '';
@@ -573,7 +518,6 @@ function createExampleCard(prompt, index, isUserGenerated = false) {
         
         showNotification('Generating your meme! 🎨', 'info');
         
-        // Auto-generate the meme after a short delay
         setTimeout(() => {
             generateMeme();
         }, 800);
@@ -582,13 +526,11 @@ function createExampleCard(prompt, index, isUserGenerated = false) {
     return card;
 }
 
-// Show notification
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
     
-    // Styles for notification
     notification.style.cssText = `
         position: fixed;
         top: 20px;
@@ -613,7 +555,6 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// Celebration animation
 function celebrate() {
     const emojis = ['🎉', '✨', '🌟', '💫', '🎊'];
     const colors = ['#ff61d8', '#05ffa1', '#ffcc00'];
@@ -642,7 +583,6 @@ function celebrate() {
     }
 }
 
-// Add floating emojis for fun
 function addFloatingEmojis() {
     const emojis = ['🐱', '💭', '✨', '🌟', '😸', '🐾', '💜', '🎨'];
     const container = document.querySelector('.container');
@@ -665,7 +605,6 @@ function addFloatingEmojis() {
     });
 }
 
-// Easter egg: Konami code
 let konamiCode = [];
 const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 
@@ -678,7 +617,6 @@ document.addEventListener('keydown', (e) => {
         showNotification('🌈 Secret mode activated! You found the easter egg! 🦄', 'success');
         celebrate();
         
-        // Add special cat mode
         document.querySelectorAll('h1, h2, h3').forEach(el => {
             el.innerHTML = el.innerHTML.replace(/Cat/g, '😸Cat😸');
         });
@@ -689,7 +627,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Add random cat facts
 const catFacts = [
     "Cats spend 70% of their lives sleeping 😴",
     "A group of cats is called a 'clowder' 🐱🐱🐱",
@@ -698,7 +635,6 @@ const catFacts = [
     "Cats can rotate their ears 180 degrees 👂"
 ];
 
-// Load random cat fact
 function loadRandomCatFact() {
     setTimeout(() => {
         const randomFact = catFacts[Math.floor(Math.random() * catFacts.length)];
@@ -706,7 +642,6 @@ function loadRandomCatFact() {
     }, 3000);
 }
 
-// Add CSS animations
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
@@ -792,7 +727,6 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Add rainbow animation
 const rainbowStyle = document.createElement('style');
 rainbowStyle.textContent = `
     @keyframes rainbow {
