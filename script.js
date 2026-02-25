@@ -1,4 +1,5 @@
-const POLLINATIONS_API = 'https://gen.pollinations.ai/image/';
+
+const POLLINATIONS_API = 'https://gen.pollinations.ai/image';
 const ORIGINAL_CATGPT_IMAGE = 'https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png';
 const CATGPT_STYLE = 'Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.';
 const CATGPT_PERSONALITY = `You are **CatGPT** – an aloof, self-important house-cat oracle.
@@ -43,7 +44,7 @@ CatGPT:`;
 }
 
 function generateImageURL(prompt) {
-    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&token=catgpt&referrer=catgpt&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}`;
+    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}&seed=${Date.now()}`;
 }
 
 function saveGeneratedPrompt(prompt) {
