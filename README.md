@@ -1,6 +1,6 @@
 # 🐱 CatGPT Meme Generator
 
-Transform your questions into sassy cat wisdom! A collaboration between [Pollinations.AI](https://pollinations.ai) and [Tanika Godbole](https://www.instagram.com/tanikagodbole/), the original creator of the CatGPT comic.
+Transform your questions into sassy cat wisdom! A collaboration between [Pollinations.AI](https://pollinations.ai) and [Tanika Godbole](https://www.instagram.com/missfitcomics/?hl=en), the original creator of the CatGPT comic.
 
 ## 🌟 About
 
@@ -10,7 +10,7 @@ This project emerged from a collaboration with Tanika Godbole, with the idea com
 
 ### 🎨 Original Inspiration
 
-The CatGPT concept was created by Tanika Godbole. Check out the [first CatGPT comic on Instagram](https://www.instagram.com/p/Cn4OLhPyDLP/)!
+The CatGPT concept was created by Tanika Godbole. Check out the [first CatGPT comic on Instagram](https://www.instagram.com/p/DIGTbKISVkL/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==)!
 
 <div align="center">
   <img src="images/original-catgpt.png" alt="Original CatGPT Comic" width="400">
@@ -106,7 +106,7 @@ The site should be available within a few minutes!
 
 ## 🤝 Credits & Collaboration
 
-- **Original CatGPT Creator**: [Tanika Godbole](https://www.instagram.com/tanikagodbole/)
+- **Original CatGPT Creator**: [Tanika Godbole](https://www.instagram.com/missfitcomics/?hl=en)
 - **AI Technology**: [Pollinations.AI](https://pollinations.ai)
 - **Idea Credit**: Dr. Julia Degen
 - **Sponsor**: [PuraPep](https://www.purapep.de/) - Premium pet food for happy cats 🐾
@@ -123,4 +123,4 @@ This project is a collaboration between Pollinations.AI and Tanika Godbole. The 
 
 ---
 
-Made with 💜 by [Pollinations.AI](https://pollinations.ai) in collaboration with [Tanika Godbole](https://www.instagram.com/tanikagodbole/)
+Made with 💜 by [Pollinations.AI](https://pollinations.ai) in collaboration with [Tanika Godbole](https://www.instagram.com/missfitcomics/?hl=en)

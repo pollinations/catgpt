@@ -149,9 +149,11 @@ const generatedMeme = document.getElementById('generatedMeme');
 const downloadBtn = document.getElementById('downloadBtn');
 const shareBtn = document.getElementById('shareBtn');
 const examplesGrid = document.getElementById('examplesGrid');
+const yourMemesGrid = document.getElementById('yourMemesGrid');
 
 document.addEventListener('DOMContentLoaded', () => {
     cleanupOldMemes(getSavedMemes());
+    loadUserMemes();
     loadExamples();
     loadRandomCatFact();
     handleURLPrompt();
@@ -500,31 +502,36 @@ async function shareMeme() {
 
 
 
-function loadExamples() {
-    examplesGrid.innerHTML = '';
+function loadUserMemes() {
+    yourMemesGrid.innerHTML = '';
     
     const savedMemes = getSavedMemes();
     
-    // Show ONLY user-generated memes from localStorage
-    savedMemes.forEach((meme, index) => {
-        // Only use stored blob URL, nothing else
-        const card = createUserMemeCard(meme.prompt, index, meme.url);
-        if (card) examplesGrid.appendChild(card);
-    });
-    
-    // Separator if there are user memes
-    if (savedMemes.length > 0) {
-        const separator = document.createElement('div');
-        separator.style.cssText = `
+    if (savedMemes.length === 0) {
+        const emptyMessage = document.createElement('p');
+        emptyMessage.textContent = 'No memes yet! Generate one to see it here. 🎨';
+        emptyMessage.style.cssText = `
             grid-column: 1 / -1;
-            height: 2px;
-            background: linear-gradient(90deg, var(--color-accent), transparent);
-            margin: 1rem 0;
+            text-align: center;
+            color: var(--color-secondary);
+            padding: 2rem;
+            font-style: italic;
         `;
-        examplesGrid.appendChild(separator);
+        yourMemesGrid.appendChild(emptyMessage);
+        return;
     }
     
-    // Show examples from EXAMPLES_MAP
+    // Show ONLY user-generated memes from localStorage
+    savedMemes.forEach((meme, index) => {
+        const card = createUserMemeCard(meme.prompt, index, meme.url);
+        if (card) yourMemesGrid.appendChild(card);
+    });
+}
+
+function loadExamples() {
+    examplesGrid.innerHTML = '';
+    
+    // Show ONLY examples from EXAMPLES_MAP
     const examplePrompts = Array.from(EXAMPLES_MAP.keys());
     examplePrompts.forEach((prompt, index) => {
         const card = createExampleCard(prompt, index);
@@ -533,6 +540,7 @@ function loadExamples() {
 }
 
 function refreshExamples() {
+    loadUserMemes();
     loadExamples();
 }
 
