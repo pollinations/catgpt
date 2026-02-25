@@ -13,7 +13,7 @@ This project emerged from a collaboration with Tanika Godbole, with the idea com
 The CatGPT concept was created by Tanika Godbole. Check out the [first CatGPT comic on Instagram](https://www.instagram.com/p/DIGTbKISVkL/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==)!
 
 <div align="center">
-  <img src="images/original-catgpt.png" alt="Original CatGPT Comic" width="400">
+  <img src="generated-examples/original-catgpt.png" alt="Original CatGPT Comic" width="400">
 </div>
 
 ## ✨ Examples
@@ -24,22 +24,22 @@ Here are some AI-generated CatGPT memes created with our generator:
   <table>
     <tr>
       <td align="center">
-        <img src="images/example1.png" alt="Weather Forecast CatGPT" width="300"><br>
+        <img src="generated-examples/example1.png" alt="Weather Forecast CatGPT" width="300"><br>
         <em>"What's the weather today?"</em>
       </td>
       <td align="center">
-        <img src="images/example2.png" alt="Debugging CatGPT" width="300"><br>
+        <img src="generated-examples/example2.png" alt="Debugging CatGPT" width="300"><br>
         <em>"How do I fix this bug?"</em>
       </td>
     </tr>
     <tr>
       <td align="center">
-        <img src="images/example3.png" alt="CatGPT Example 3" width="300"><br>
+        <img src="generated-examples/example3.png" alt="CatGPT Example 3" width="300"><br>
         <em>More feline wisdom</em>
       </td>
       <td align="center">
-        <img src="images/example4.png" alt="CatGPT Example 4" width="300"><br>
-        <em>Classic cat attitude</em>
+        <img src="generated-examples/example4.png" alt="CatGPT Example 4" width="300"><br>
+        <em>Classic cat attitude
       </td>
     </tr>
   </table>
