@@ -44,14 +44,11 @@ CatGPT:`;
 }
 
 function createImageGenerationPrompt(userQuestion) {
-    return `${CATGPT_STYLE}
-
-Human asks: "${userQuestion}"
-CatGPT responds:`;
+    return `Single-panel CatGPT webcomic, white background, thick black marker strokes. White cat with black patches, human with bob hair. Handwritten text. "${userQuestion}" CatGPT responds sarcastically as an aloof cat. Black and white comic style.`;
 }
 
 function generateImageURL(prompt) {
-    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}&seed=42`;
+    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?height=1024&width=1024&model=gptimage&enhance=true&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}`;
 }
 
 async function fetchImageWithAuth(imageUrl) {
