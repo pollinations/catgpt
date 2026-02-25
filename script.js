@@ -1,9 +1,6 @@
 
-const POLLINATIONS_API = 'https://image.pollinations.ai/prompt';
+const POLLINATIONS_API = 'https://gen.pollinations.ai/image';
 const ORIGINAL_CATGPT_IMAGE = 'https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png';
-const CLOUDINARY_CLOUD_NAME = 'pollinations';
-const CLOUDINARY_UPLOAD_PRESET = 'pollinations-image';
-const CLOUDINARY_API_KEY = '939386723511927';
 const CATGPT_STYLE = 'Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.';
 const CATGPT_PERSONALITY = `You are **CatGPT** – an aloof, self-important house-cat oracle.
 
@@ -49,20 +46,18 @@ Human asks: "${userQuestion}"
 CatGPT responds (2-5 words, funny):`;
 }
 
-function generateImageURL(prompt, uploadedImageUrl = null) {
-    let imageParam;
-    if (uploadedImageUrl) {
-        imageParam = encodeURIComponent(`${ORIGINAL_CATGPT_IMAGE},${uploadedImageUrl}`);
-    } else {
-        imageParam = encodeURIComponent(ORIGINAL_CATGPT_IMAGE);
-    }
-    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=nanobanana&image=${imageParam}&referrer=pollinations.github.io&quality=high`;
+function generateImageURL(prompt) {
+    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?height=1024&width=1024&model=gptimage&enhance=true&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}`;
 }
 
 async function fetchImageWithAuth(imageUrl) {
     const response = await fetch(imageUrl, {
-        method: 'GET'
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer pk_w3kAO902fOeFYiNm'
+        }
     });
+    
     
     if (!response.ok) {
         let errorDetails = '';
@@ -73,6 +68,7 @@ async function fetchImageWithAuth(imageUrl) {
             errorDetails = await response.text();
         }
         
+        // Log detailed error for debugging only (console)
         console.error('API Error Details:', {
             status: response.status,
             statusText: response.statusText,
@@ -80,6 +76,7 @@ async function fetchImageWithAuth(imageUrl) {
             url: imageUrl
         });
         
+        // Don't expose backend errors to users - throw generic error
         throw new Error(`API_ERROR_${response.status}`);
     }
     
@@ -119,82 +116,6 @@ function cleanupOldMemes(memes) {
     return filtered;
 }
 
-function fileToDataURI(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-async function uploadToCloudinary(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    
-    if (CLOUDINARY_API_KEY) {
-        formData.append('api_key', CLOUDINARY_API_KEY);
-    }
-    
-    try {
-        const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-            {
-                method: 'POST',
-                body: formData
-            }
-        );
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Cloudinary error:', errorData);
-            throw new Error(`Upload failed: ${errorData.error?.message || 'Unknown error'}`);
-        }
-        
-        const data = await response.json();
-        return data.secure_url;
-    } catch (error) {
-        console.error('Cloudinary upload failed:', error);
-        throw error;
-    }
-}
-
-async function handleImageUpload(file) {
-    if (!file) {
-        return null;
-    }
-    
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-        showNotification('Image too large! Please use an image under 5MB.', 'error');
-        return null;
-    }
-    
-    try {
-        showNotification('Uploading image...', 'info');
-        return await uploadToCloudinary(file);
-    } catch (error) {
-        console.error('Cloudinary upload failed:', error);
-        showNotification('Cloud upload failed. Trying local method...', 'warning');
-        
-        try {
-            const dataUri = await fileToDataURI(file);
-            
-            if (dataUri.length > 500000) {
-                showNotification('Image may be too large for reliable use. Results might vary.', 'warning');
-            }
-            
-            return dataUri;
-        } catch (fallbackError) {
-            showNotification('Could not process image. Please try a smaller image.', 'error');
-            console.error('Base64 fallback failed:', fallbackError);
-            return null;
-        }
-    }
-}
-
-
 function getURLPrompt() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('prompt');
@@ -229,13 +150,6 @@ const downloadBtn = document.getElementById('downloadBtn');
 const shareBtn = document.getElementById('shareBtn');
 const examplesGrid = document.getElementById('examplesGrid');
 const yourMemesGrid = document.getElementById('yourMemesGrid');
-const imageUpload = document.getElementById('imageUpload');
-const imageUploadContainer = document.getElementById('imageUploadContainer');
-const imageThumbnailContainer = document.getElementById('imageThumbnailContainer');
-const imageThumbnail = document.getElementById('imageThumbnail');
-const removeImageBtn = document.getElementById('removeImageBtn');
-
-let uploadedImageUrl = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     cleanupOldMemes(getSavedMemes());
@@ -247,25 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
     generateBtn.addEventListener('click', generateMeme);
     downloadBtn.addEventListener('click', downloadMeme);
     shareBtn.addEventListener('click', shareMeme);
-    
-    imageUpload.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            uploadedImageUrl = await handleImageUpload(file);
-            if (uploadedImageUrl) {
-                imageThumbnail.src = URL.createObjectURL(file);
-                imageUploadContainer.classList.add('hidden');
-                imageThumbnailContainer.classList.remove('hidden');
-            }
-        }
-    });
-    
-    removeImageBtn.addEventListener('click', () => {
-        uploadedImageUrl = null;
-        imageUpload.value = '';
-        imageThumbnailContainer.classList.add('hidden');
-        imageUploadContainer.classList.remove('hidden');
-    });
     
     userInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
@@ -301,7 +196,7 @@ async function generateMeme() {
     const imagePrompt = createImageGenerationPrompt(userQuestion);
     
     try {
-        const imageUrl = generateImageURL(imagePrompt, uploadedImageUrl);
+        const imageUrl = generateImageURL(imagePrompt);
         
         let imageLoadTimeout;
         

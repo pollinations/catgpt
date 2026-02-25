@@ -1,5 +1,3 @@
-// API Client and Image Generation
-
 import { API_CONFIG } from './config.js';
 
 export function generateImageURL(prompt, uploadedImageUrl = null) {
@@ -23,15 +21,12 @@ export async function fetchImageWithAuth(imageUrl) {
     if (!response.ok) {
         let errorDetails = '';
         try {
-            // Read response body only once
             const responseText = await response.text();
             
-            // Try to parse as JSON
             try {
                 const errorData = JSON.parse(responseText);
                 errorDetails = errorData.error?.message || JSON.stringify(errorData);
             } catch {
-                // If not JSON, use the text as-is
                 errorDetails = responseText || `HTTP ${response.status}`;
             }
         } catch (e) {
@@ -51,4 +46,3 @@ export async function fetchImageWithAuth(imageUrl) {
     const blob = await response.blob();
     return URL.createObjectURL(blob);
 }
-
