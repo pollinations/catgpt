@@ -38,7 +38,12 @@ CatGPT:`;
 }
 
 function createImageGenerationPrompt(userQuestion) {
-    return `Single-panel CatGPT webcomic, white background, thick black marker strokes. White cat with black patches, human with bob hair. Handwritten text. "${userQuestion}" CatGPT responds sarcastically as an aloof cat. Black and white comic style.`;
+    return `Single-panel CatGPT webcomic, white background, thick black marker strokes. White cat with black patches, human with bob hair. Handwritten text.
+
+IMPORTANT: CatGPT's response MUST be 2-5 words ONLY. Make it funny, sarcastic, and dismissive. Examples: "Not your problem.", "I'd rather nap.", "Hard pass, human."
+
+Human asks: "${userQuestion}"
+CatGPT responds (2-5 words, funny):`;
 }
 
 function generateImageURL(prompt) {
@@ -49,12 +54,10 @@ async function fetchImageWithAuth(imageUrl) {
     const response = await fetch(imageUrl, {
         method: 'GET',
         headers: {
-            'Authorization': 'Bearer sk_5BhR9xkLDsfzwwW4u5UiSAaWjTnzDTR6Dr81r0LYlq3wnUddj4Ftx1GHUQqaDD3B'
-
-            
+            'Authorization': 'Bearer pk_w3kAO902fOeFYiNm'
         }
     });
-    //pk_w3kAO902fOeFYiNm
+    
     
     if (!response.ok) {
         let errorDetails = '';
