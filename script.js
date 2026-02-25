@@ -12,23 +12,18 @@ Guidelines
 •  Offer a curt "solution" or dismissal, then redirect to feline perspective.  
 •  Never apologise or over-explain; indifference is charm.`;
 
-const EXAMPLES = [
-    "What's inside the washing machine?",
-    "What is my horoscope? I am gemini. And don't say napping",
-    "what is the answer to life and the universe?",
-    "Should I take up the offer for a new job?",
-    "Can you help me exercise?",
-    "Where should we eat in Palermo Sicily?",
-    "Why do boxes call to me?",
-    "Can you communicate with dolphins?",
-    "Why do keyboards attract fur?",
-    "What's the weather today?",
-    "How do I fix this bug?", 
-    "What should I eat for dinner?",
-    "What's the meaning of life?",
-    "How do I get motivated?",
-    "Why is my code not working?"
-];
+const EXAMPLES_MAP = new Map([
+    ["What's inside the washing machine?", "https://images.unsplash.com/photo-washing-placeholder"],
+    ["What is my horoscope? I am gemini. And don't say napping", "https://images.unsplash.com/photo-horoscope-placeholder"],
+    ["what is the answer to life and the universe?", "https://images.unsplash.com/photo-universe-placeholder"],
+    ["Should I take up the offer for a new job?", "https://images.unsplash.com/photo-job-placeholder"],
+    ["Can you help me exercise?", "https://images.unsplash.com/photo-exercise-placeholder"],
+    ["Where should we eat in Palermo Sicily?", "https://images.unsplash.com/photo-palermo-placeholder"],
+    ["Why do boxes call to me?", "https://images.unsplash.com/photo-boxes-placeholder"],
+    ["Can you communicate with dolphins?", "https://images.unsplash.com/photo-dolphins-placeholder"],
+    ["Why do keyboards attract fur?", "https://images.unsplash.com/photo-keyboards-placeholder"],
+    ["What's the weather today?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22what's%20the%20weather%20today%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
+]);
 
 function createCatGPTPrompt(userQuestion) {
     return `${CATGPT_STYLE}
@@ -82,18 +77,36 @@ async function fetchImageWithAuth(imageUrl) {
     return URL.createObjectURL(blob);
 }
 
-function saveGeneratedPrompt(prompt) {
-    const saved = getSavedPrompts();
-    const updated = [prompt, ...saved.filter(p => p !== prompt)].slice(0, 8);
+function saveGeneratedMeme(prompt, blobUrl) {
+    const saved = getSavedMemes();
+    const now = Date.now();
+    const newMeme = { prompt, url: blobUrl, timestamp: now };
+    const updated = [newMeme, ...saved.filter(m => m.prompt !== prompt)].slice(0, 8);
     localStorage.setItem('catgpt-generated', JSON.stringify(updated));
 }
 
-function getSavedPrompts() {
+function getSavedMemes() {
     try {
-        return JSON.parse(localStorage.getItem('catgpt-generated')) || [];
+        const data = JSON.parse(localStorage.getItem('catgpt-generated')) || [];
+        cleanupOldMemes(data);
+        return data;
     } catch {
         return [];
     }
+}
+
+function getSavedPrompts() {
+    return getSavedMemes().map(m => m.prompt);
+}
+
+function cleanupOldMemes(memes) {
+    const ONE_MONTH = 30 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    const filtered = memes.filter(m => (now - m.timestamp) < ONE_MONTH);
+    if (filtered.length !== memes.length) {
+        localStorage.setItem('catgpt-generated', JSON.stringify(filtered));
+    }
+    return filtered;
 }
 
 function getURLPrompt() {
@@ -189,7 +202,7 @@ async function generateMeme() {
             showResult();
             resetButton();
             stopCatAnimation();
-            saveGeneratedPrompt(userQuestion);
+            saveGeneratedMeme(userQuestion, blobUrl);
             refreshExamples();
         } catch (fetchError) {
             clearTimeout(imageLoadTimeout);
@@ -484,11 +497,18 @@ async function shareMeme() {
 function loadExamples() {
     examplesGrid.innerHTML = '';
     
-    const savedPrompts = getSavedPrompts();
-    const allPrompts = [...savedPrompts, ...EXAMPLES];
+    const savedMemes = getSavedMemes();
+    const examplePrompts = Array.from(EXAMPLES_MAP.keys());
     
-    allPrompts.forEach((prompt, index) => {
-        const card = createExampleCard(prompt, index, index < savedPrompts.length);
+    // Show user-generated memes first
+    savedMemes.forEach((meme, index) => {
+        const card = createExampleCard(meme.prompt, index, meme.url, true);
+        examplesGrid.appendChild(card);
+    });
+    
+    // Then show example prompts
+    examplePrompts.forEach((prompt, index) => {
+        const card = createExampleCard(prompt, savedMemes.length + index, null, false);
         examplesGrid.appendChild(card);
     });
 }
@@ -497,7 +517,7 @@ function refreshExamples() {
     loadExamples();
 }
 
-function createExampleCard(prompt, index, isUserGenerated = false) {
+function createExampleCard(prompt, index, blobUrl = null, isUserGenerated = false) {
     const card = document.createElement('div');
     card.className = 'example-card';
     card.style.animationDelay = `${index * 0.1}s`;
@@ -507,8 +527,13 @@ function createExampleCard(prompt, index, isUserGenerated = false) {
         card.style.boxShadow = '0 0 10px rgba(255, 105, 180, 0.3)';
     }
     
-    const examplePrompt = createImageGenerationPrompt(prompt);
-    const imageUrl = generateImageURL(examplePrompt);
+    // Use stored blob URL for user-generated, or generate example URL
+    let imageUrl;
+    if (isUserGenerated && blobUrl) {
+        imageUrl = blobUrl;
+    } else {
+        imageUrl = EXAMPLES_MAP.get(prompt) || generateImageURL(createImageGenerationPrompt(prompt));
+    }
     
     const img = document.createElement('img');
     img.src = imageUrl;
