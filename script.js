@@ -13,15 +13,15 @@ Guidelines
 •  Never apologise or over-explain; indifference is charm.`;
 
 const EXAMPLES_MAP = new Map([
-    ["What's inside the washing machine?", "https://images.unsplash.com/photo-washing-placeholder"],
-    ["What is my horoscope? I am gemini. And don't say napping", "https://images.unsplash.com/photo-horoscope-placeholder"],
-    ["what is the answer to life and the universe?", "https://images.unsplash.com/photo-universe-placeholder"],
-    ["Should I take up the offer for a new job?", "https://images.unsplash.com/photo-job-placeholder"],
-    ["Can you help me exercise?", "https://images.unsplash.com/photo-exercise-placeholder"],
-    ["Where should we eat in Palermo Sicily?", "https://images.unsplash.com/photo-palermo-placeholder"],
-    ["Why do boxes call to me?", "https://images.unsplash.com/photo-boxes-placeholder"],
-    ["Can you communicate with dolphins?", "https://images.unsplash.com/photo-dolphins-placeholder"],
-    ["Why do keyboards attract fur?", "https://images.unsplash.com/photo-keyboards-placeholder"],
+    ["What's inside the washing machine?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22What's%20inside%20the%20washing%20machine%3F%3F%3F %3F CatGPT responds sarcastically as an aloof cat. Black and white comic style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
+    ["What is my horoscope? I am gemini. And don't say napping", "https://gen.pollinations.ai/image/Single-panel CatGPT webcomic, white background, thick black marker strokes. White cat with black patches, human with bob hair. Handwritten text. \"What is my horoscope? I am gemini. And don't say napping\" CatGPT responds sarcastically as an aloof cat. Black and white comic style.?height=1024&width=1024&model=gptimage&enhance=true&image=https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png"],
+    ["what is the answer to life and the universe?", "https://gen.pollinations.ai/image/Single-panel CatGPT webcomic, white background, thick black marker strokes. White cat with black patches, human with bob hair. Handwritten text. \"what is the answer to life and the universe?\" CatGPT responds sarcastically as an aloof cat. Black and white comic style.?height=1024&width=1024&model=gptimage&enhance=true&image=https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png"],
+    ["Should I take up the offer for a new job?", "https://gen.pollinations.ai/image/Single-panel CatGPT webcomic, white background, thick black marker strokes. White cat with black patches, human with bob hair. Handwritten text. \"Should I take up the offer for a new job?\" CatGPT responds sarcastically as an aloof cat. Black and white comic style.?height=1024&width=1024&model=gptimage&enhance=true&image=https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png"],
+    ["Can you help me exercise?", "https://gen.pollinations.ai/image/Single-panel CatGPT webcomic, white background, thick black marker strokes. White cat with black patches, human with bob hair. Handwritten text. \"Can you help me exercise?\" CatGPT responds sarcastically as an aloof cat. Black and white comic style.?height=1024&width=1024&model=gptimage&enhance=true&image=https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png"],
+    ["Where should we eat in Palermo Sicily?", "https://gen.pollinations.ai/image/Single-panel CatGPT webcomic, white background, thick black marker strokes. White cat with black patches, human with bob hair. Handwritten text. \"Where should we eat in Palermo Sicily?\" CatGPT responds sarcastically as an aloof cat. Black and white comic style.?height=1024&width=1024&model=gptimage&enhance=true&image=https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png"],
+    ["Why do boxes call to me?", "https://gen.pollinations.ai/image/Single-panel CatGPT webcomic, white background, thick black marker strokes. White cat with black patches, human with bob hair. Handwritten text. \"Why do boxes call to me?\" CatGPT responds sarcastically as an aloof cat. Black and white comic style.?height=1088&width=1536&model=gptimage&enhance=true&image=https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png"],
+    ["Can you communicate with dolphins?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22Can%20you%20communicate%20with%20dolphins%3F%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
+    ["Why do keyboards attract fur?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22Why%20do%20keyboards%20attract%20fur%3F%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
     ["What's the weather today?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22what's%20the%20weather%20today%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
 ]);
 
@@ -63,6 +63,7 @@ async function fetchImageWithAuth(imageUrl) {
             errorDetails = await response.text();
         }
         
+        // Log detailed error for debugging only (console)
         console.error('API Error Details:', {
             status: response.status,
             statusText: response.statusText,
@@ -70,7 +71,8 @@ async function fetchImageWithAuth(imageUrl) {
             url: imageUrl
         });
         
-        throw new Error(`API Error ${response.status}: ${errorDetails || response.statusText}`);
+        // Don't expose backend errors to users - throw generic error
+        throw new Error(`API_ERROR_${response.status}`);
     }
     
     const blob = await response.blob();
@@ -144,6 +146,7 @@ const shareBtn = document.getElementById('shareBtn');
 const examplesGrid = document.getElementById('examplesGrid');
 
 document.addEventListener('DOMContentLoaded', () => {
+    cleanupOldMemes(getSavedMemes());
     loadExamples();
     loadRandomCatFact();
     handleURLPrompt();
@@ -206,9 +209,9 @@ async function generateMeme() {
             refreshExamples();
         } catch (fetchError) {
             clearTimeout(imageLoadTimeout);
-            console.error('Full error:', fetchError);
+            console.error('Generation error:', fetchError);
             resetButton();
-            handleImageError('general', fetchError.message);
+            handleImageError('general');
         }
         
     } catch (error) {
@@ -233,9 +236,7 @@ function handleImageError(errorType = 'general', errorMessage = '') {
     const randomMessage = catMessages[Math.floor(Math.random() * catMessages.length)];
     
     let specificMessage;
-    if (errorMessage) {
-        specificMessage = `⚠️ API Error: ${errorMessage}`;
-    } else if (errorType === 'timeout') {
+    if (errorType === 'timeout') {
         specificMessage = "⏰ This cat took too long to respond... probably distracted by a laser pointer! " + randomMessage;
     } else {
         specificMessage = randomMessage;
