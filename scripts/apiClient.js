@@ -9,21 +9,33 @@ export function generateImageURL(prompt, uploadedImageUrl = null) {
     } else {
         imageParam = encodeURIComponent(API_CONFIG.ORIGINAL_CATGPT_IMAGE);
     }
-    return `${API_CONFIG.POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=nanobanana&image=${imageParam}&referrer=pollinations.github.io&quality=high`;
+    return `${API_CONFIG.POLLINATIONS_API}/${encodeURIComponent(prompt)}?height=1024&width=1024&enhance=true&model=gptimage&quality=high&image=${imageParam}`;
 }
 
 export async function fetchImageWithAuth(imageUrl) {
     const response = await fetch(imageUrl, {
-        method: 'GET'
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${API_CONFIG.POLLINATIONS_API_KEY}`
+        }
     });
     
     if (!response.ok) {
         let errorDetails = '';
         try {
-            const errorData = await response.json();
-            errorDetails = errorData.error?.message || JSON.stringify(errorData);
+            // Read response body only once
+            const responseText = await response.text();
+            
+            // Try to parse as JSON
+            try {
+                const errorData = JSON.parse(responseText);
+                errorDetails = errorData.error?.message || JSON.stringify(errorData);
+            } catch {
+                // If not JSON, use the text as-is
+                errorDetails = responseText || `HTTP ${response.status}`;
+            }
         } catch (e) {
-            errorDetails = await response.text();
+            errorDetails = `HTTP ${response.status}: ${response.statusText}`;
         }
         
         console.error('API Error Details:', {
@@ -39,3 +51,4 @@ export async function fetchImageWithAuth(imageUrl) {
     const blob = await response.blob();
     return URL.createObjectURL(blob);
 }
+

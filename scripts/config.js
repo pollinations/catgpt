@@ -1,11 +1,12 @@
 // Configuration and Constants
 
 export const API_CONFIG = {
-    POLLINATIONS_API: 'https://image.pollinations.ai/prompt',
+    POLLINATIONS_API: 'https://gen.pollinations.ai/image',
     ORIGINAL_CATGPT_IMAGE: 'https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png',
     CLOUDINARY_CLOUD_NAME: 'pollinations',
     CLOUDINARY_UPLOAD_PRESET: 'pollinations-image',
-    CLOUDINARY_API_KEY: '939386723511927'
+    CLOUDINARY_API_KEY: '939386723511927',
+    POLLINATIONS_API_KEY: 'pk_w3kAO902fOeFYiNm' 
 };
 
 export const CATGPT_STYLE = 'Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.';
