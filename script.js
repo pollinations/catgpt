@@ -43,8 +43,15 @@ Human asks: "${userQuestion}"
 CatGPT:`;
 }
 
+function createImageGenerationPrompt(userQuestion) {
+    return `${CATGPT_STYLE}
+
+Human asks: "${userQuestion}"
+CatGPT responds:`;
+}
+
 function generateImageURL(prompt) {
-    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}&seed=${Date.now()}`;
+    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?model=gptimage&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}&seed=42`;
 }
 
 async function fetchImageWithAuth(imageUrl) {
@@ -56,7 +63,22 @@ async function fetchImageWithAuth(imageUrl) {
     });
     
     if (!response.ok) {
-        throw new Error(`API Error ${response.status}: ${response.statusText}`);
+        let errorDetails = '';
+        try {
+            const errorData = await response.json();
+            errorDetails = errorData.error?.message || JSON.stringify(errorData);
+        } catch (e) {
+            errorDetails = await response.text();
+        }
+        
+        console.error('API Error Details:', {
+            status: response.status,
+            statusText: response.statusText,
+            details: errorDetails,
+            url: imageUrl
+        });
+        
+        throw new Error(`API Error ${response.status}: ${errorDetails || response.statusText}`);
     }
     
     const blob = await response.blob();
@@ -151,9 +173,10 @@ async function generateMeme() {
     startCatAnimation();
     
     const fullPrompt = createCatGPTPrompt(userQuestion);
+    const imagePrompt = createImageGenerationPrompt(userQuestion);
     
     try {
-        const imageUrl = generateImageURL(fullPrompt);
+        const imageUrl = generateImageURL(imagePrompt);
         
         let imageLoadTimeout;
         
@@ -173,9 +196,9 @@ async function generateMeme() {
             refreshExamples();
         } catch (fetchError) {
             clearTimeout(imageLoadTimeout);
-            console.error('Error fetching image:', fetchError);
+            console.error('Full error:', fetchError);
             resetButton();
-            handleImageError();
+            handleImageError('general', fetchError.message);
         }
         
     } catch (error) {
@@ -185,7 +208,7 @@ async function generateMeme() {
     }
 }
 
-function handleImageError(errorType = 'general') {
+function handleImageError(errorType = 'general', errorMessage = '') {
     const catMessages = [
         "😾 *yawns* The art studio is full of sleeping cats... try again in 30 seconds!",
         "🐱 *stretches paws* Too many humans asking questions! I need a catnap... wait 30 seconds, please.",
@@ -200,7 +223,9 @@ function handleImageError(errorType = 'general') {
     const randomMessage = catMessages[Math.floor(Math.random() * catMessages.length)];
     
     let specificMessage;
-    if (errorType === 'timeout') {
+    if (errorMessage) {
+        specificMessage = `⚠️ API Error: ${errorMessage}`;
+    } else if (errorType === 'timeout') {
         specificMessage = "⏰ This cat took too long to respond... probably distracted by a laser pointer! " + randomMessage;
     } else {
         specificMessage = randomMessage;
@@ -485,7 +510,7 @@ function createExampleCard(prompt, index, isUserGenerated = false) {
         card.style.boxShadow = '0 0 10px rgba(255, 105, 180, 0.3)';
     }
     
-    const examplePrompt = createCatGPTPrompt(prompt);
+    const examplePrompt = createImageGenerationPrompt(prompt);
     const imageUrl = generateImageURL(examplePrompt);
     
     const img = document.createElement('img');
