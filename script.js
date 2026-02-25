@@ -504,18 +504,31 @@ function loadExamples() {
     examplesGrid.innerHTML = '';
     
     const savedMemes = getSavedMemes();
-    const examplePrompts = Array.from(EXAMPLES_MAP.keys());
     
-    // Show user-generated memes first
+    // Show ONLY user-generated memes from localStorage
     savedMemes.forEach((meme, index) => {
-        const card = createExampleCard(meme.prompt, index, meme.url, true);
-        examplesGrid.appendChild(card);
+        // Only use stored blob URL, nothing else
+        const card = createUserMemeCard(meme.prompt, index, meme.url);
+        if (card) examplesGrid.appendChild(card);
     });
     
-    // Then show example prompts
+    // Separator if there are user memes
+    if (savedMemes.length > 0) {
+        const separator = document.createElement('div');
+        separator.style.cssText = `
+            grid-column: 1 / -1;
+            height: 2px;
+            background: linear-gradient(90deg, var(--color-accent), transparent);
+            margin: 1rem 0;
+        `;
+        examplesGrid.appendChild(separator);
+    }
+    
+    // Show examples from EXAMPLES_MAP
+    const examplePrompts = Array.from(EXAMPLES_MAP.keys());
     examplePrompts.forEach((prompt, index) => {
-        const card = createExampleCard(prompt, savedMemes.length + index, null, false);
-        examplesGrid.appendChild(card);
+        const card = createExampleCard(prompt, index);
+        if (card) examplesGrid.appendChild(card);
     });
 }
 
@@ -523,23 +536,81 @@ function refreshExamples() {
     loadExamples();
 }
 
-function createExampleCard(prompt, index, blobUrl = null, isUserGenerated = false) {
+function createUserMemeCard(prompt, index, blobUrl) {
+    // User memes: ONLY use stored blob URL from localStorage
+    if (!blobUrl) {
+        console.warn(`User meme has no blob URL: "${prompt}"`);
+        return null;
+    }
+    
     const card = document.createElement('div');
     card.className = 'example-card';
     card.style.animationDelay = `${index * 0.1}s`;
+    card.style.border = '2px solid var(--color-accent)';
+    card.style.boxShadow = '0 0 10px rgba(255, 105, 180, 0.3)';
     
-    if (isUserGenerated) {
-        card.style.border = '2px solid var(--color-accent)';
-        card.style.boxShadow = '0 0 10px rgba(255, 105, 180, 0.3)';
+    // Display the stored blob image
+    const img = document.createElement('img');
+    img.src = blobUrl;
+    img.alt = prompt;
+    img.loading = 'lazy';
+    
+    const badge = document.createElement('div');
+    badge.textContent = '✨ Your Meme';
+    badge.style.cssText = `
+        background: var(--gradient-1);
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    `;
+    
+    const promptText = document.createElement('p');
+    promptText.textContent = `"${prompt}"`;
+    promptText.style.fontStyle = 'italic';
+    promptText.style.fontSize = '0.9rem';
+    promptText.style.color = 'var(--color-primary)';
+    promptText.style.textAlign = 'center';
+    promptText.style.margin = '0.5rem 0';
+    
+    card.appendChild(badge);
+    card.appendChild(img);
+    card.appendChild(promptText);
+    
+    card.addEventListener('click', () => {
+        userInput.value = prompt;
+        userInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        userInput.focus();
+        
+        userInput.style.animation = 'pulse 0.5s';
+        setTimeout(() => {
+            userInput.style.animation = '';
+        }, 500);
+        
+        showNotification('Generating your meme! 🎨', 'info');
+        
+        setTimeout(() => {
+            generateMeme();
+        }, 800);
+    });
+    
+    return card;
+}
+
+function createExampleCard(prompt, index) {
+    // Examples: ONLY from EXAMPLES_MAP
+    const imageUrl = EXAMPLES_MAP.get(prompt);
+    if (!imageUrl) {
+        console.warn(`Example "${prompt}" not found in EXAMPLES_MAP`);
+        return null;
     }
     
-    // Use stored blob URL for user-generated, or generate example URL
-    let imageUrl;
-    if (isUserGenerated && blobUrl) {
-        imageUrl = blobUrl;
-    } else {
-        imageUrl = EXAMPLES_MAP.get(prompt) || generateImageURL(createImageGenerationPrompt(prompt));
-    }
+    const card = document.createElement('div');
+    card.className = 'example-card';
+    card.style.animationDelay = `${index * 0.1}s`;
     
     const img = document.createElement('img');
     img.src = imageUrl;
@@ -553,22 +624,6 @@ function createExampleCard(prompt, index, blobUrl = null, isUserGenerated = fals
     promptText.style.color = 'var(--color-primary)';
     promptText.style.textAlign = 'center';
     promptText.style.margin = '0.5rem 0';
-    
-    if (isUserGenerated) {
-        const badge = document.createElement('div');
-        badge.textContent = '✨ Your Meme';
-        badge.style.cssText = `
-            background: var(--gradient-1);
-            color: white;
-            padding: 0.2rem 0.5rem;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            text-align: center;
-        `;
-        card.appendChild(badge);
-    }
     
     card.appendChild(img);
     card.appendChild(promptText);
