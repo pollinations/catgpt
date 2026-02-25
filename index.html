@@ -23,7 +23,7 @@
     <meta name="keywords" content="CatGPT, meme generator, cat memes, AI memes, Pollinations.AI, funny cat, meme creator">
     <meta name="author" content="Pollinations.AI & Tanika Godbole">
     
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles/main.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
 </head>
 <body>
@@ -62,8 +62,6 @@
 
             <div class="input-group">
                 <label for="imageUpload">Optional: Upload your own reference image</label>
-                
-                <!-- File input (visible when no image uploaded) -->
                 <div id="imageUploadContainer" class="upload-container">
                     <input 
                         type="file" 
@@ -74,7 +72,6 @@
                     <p class="upload-note">Upload an image to use as a style reference (max 5MB)</p>
                 </div>
                 
-                <!-- Thumbnail preview (visible after upload) -->
                 <div id="imageThumbnailContainer" class="thumbnail-container hidden">
                     <img id="imageThumbnail" class="image-thumbnail" alt="Uploaded image preview" />
                     <button id="removeImageBtn" class="remove-image-btn" aria-label="Remove image">
@@ -137,7 +134,6 @@
         </footer>
     </div>
 
-    <script src="ai.js"></script>
-    <script src="script.js?v=20250530"></script>
+    <script type="module" src="scripts/main.js"></script>
 </body>
 </html>
