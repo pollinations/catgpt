@@ -463,6 +463,23 @@ header {
     font-weight: 500;
 }
 
+/* Your Memes Section */
+.your-memes-section {
+    margin-bottom: 3rem;
+}
+
+.your-memes-section h2 {
+    font-size: 1.8rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.your-memes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
 /* Sponsor Section */
 .sponsor-section {
     background: var(--gradient-2);

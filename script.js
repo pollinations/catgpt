@@ -1,130 +1,146 @@
-// CatGPT Meme Generator Script 🐱✨
-// Note: AI functionality is now provided by ai.js
 
-// Image upload handler
-let uploadedImageUrl = null;
+const POLLINATIONS_API = 'https://gen.pollinations.ai/image';
+const ORIGINAL_CATGPT_IMAGE = 'https://raw.githubusercontent.com/pollinations/catgpt/refs/heads/main/images/original-catgpt.png';
+const CATGPT_STYLE = 'Single-panel CatGPT webcomic on white background. Thick uneven black marker strokes, intentionally sketchy. Human with dot eyes, black bob hair, brick/burgundy sweater (#8b4035). White cat with black patches sitting upright, half-closed eyes. Hand-written wobbly text, "CATGPT" title in rounded rectangle. @missfitcomics signature. 95% black-and-white, no shading.';
+const CATGPT_PERSONALITY = `You are **CatGPT** – an aloof, self-important house-cat oracle.
 
-// Image upload functions are now provided by ai.js
-// Using handleImageUpload from ai.js with showNotification callback
+Guidelines
+•  Replies: one or two crisp sentences, no filler.  
+•  Tone: detached, sardonic, subtly superior.  
+•  Cats outrank humans; human problems = minor curiosities.  
+•  When self-referential, be unpredictable and natural.
+•  Offer a curt "solution" or dismissal, then redirect to feline perspective.  
+•  Never apologise or over-explain; indifference is charm.`;
 
-// CatGPT prompt creation is now provided by ai.js
+const EXAMPLES_MAP = new Map([
+    ["What is my horoscope? I am gemini. And don't say napping", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22What%20is%20my%20horoscope%3F%20I%20am%20gemini.%20And%20don't%20say%20napping%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
+    ["what is the answer to life and the universe?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22what%20is%20the%20answer%20to%20life%20and%20the%20universe%3F%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
+    ["Should I take up the offer for a new job?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22Should%20I%20take%20up%20the%20offer%20for%20a%20new%20job%3F%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
+    ["Can you help me exercise?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22Can%20you%20help%20me%20exercise%3F%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
+    ["Where should we eat in Palermo Sicily?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22Where%20should%20we%20eat%20in%20Palermo%20Sicily%3F%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
+    ["Why do boxes call to me?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22Why%20do%20boxes%20call%20to%20me%3F%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
+    ["Can you communicate with dolphins?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22Can%20you%20communicate%20with%20dolphins%3F%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
+    ["Why do keyboards attract fur?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22Why%20do%20keyboards%20attract%20fur%3F%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
+    ["What's the weather today?", "https://gen.pollinations.ai/image/Single-panel%20CatGPT%20webcomic%2C%20white%20background%2C%20thick%20black%20marker%20strokes.%20White%20cat%20with%20black%20patches%2C%20human%20with%20bob%20hair.%20Handwritten%20text.%20%22what's%20the%20weather%20today%22%20CatGPT%20responds%20sarcastically%20as%20an%20aloof%20cat.%20Black%20and%20white%20comic%20style.?height=1024&width=1024&model=gptimage&enhance=true&image=https%3A%2F%2Fraw.githubusercontent.com%2Fpollinations%2Fcatgpt%2Frefs%2Fheads%2Fmain%2Fimages%2Foriginal-catgpt.png"],
+]);
 
-// Example memes for the gallery
-const EXAMPLES = [
-    { prompt: "How many R's in strawberry?", imageUrl: null },
-    { prompt: "running late...", imageUrl: null },
-    { prompt: "I told the KGB about you", imageUrl: null },
-    { prompt: "What's inside the washing machine?", imageUrl: null },
-    { prompt: "What is my horoscope? I am gemini. And don't say napping", imageUrl: null },
-    { prompt: "what is the answer to life and the universe?", imageUrl: null },
-    { prompt: "Should I take up the offer for a new job?", imageUrl: null },
-    { prompt: "Can you help me exercise?", imageUrl: null },
-    { prompt: "Where should we eat in Palermo Sicily?", imageUrl: null },
-    { prompt: "Why do boxes call to me?", imageUrl: null },
-    { prompt: "Can you communicate with dolphins?", imageUrl: null },
-    { prompt: "Why do keyboards attract fur?", imageUrl: null },
-    { prompt: "What's the weather today?", imageUrl: null },
-    { prompt: "How do I fix this bug?", imageUrl: null },
-    { prompt: "What should I eat for dinner?", imageUrl: null },
-    { prompt: "What's the meaning of life?", imageUrl: null },
-    { prompt: "How do I get motivated?", imageUrl: null },
-    { prompt: "Why is my code not working?", imageUrl: null }
-];
+function createCatGPTPrompt(userQuestion) {
+    return `${CATGPT_STYLE}
 
-// Image URL generation is now provided by ai.js
-// Note: Using generateImageURL(prompt, uploadedImageUrl) from ai.js
+---
 
-// LocalStorage functions for user-generated memes
-function saveGeneratedPrompt(prompt) {
-    const saved = getSavedPrompts();
-    
-    // Create object with prompt and image URL (if exists)
-    const promptData = {
-        prompt: prompt,
-        imageUrl: uploadedImageUrl || null
-    };
-    
-    // Add to beginning, remove duplicates, limit to 8 items
-    // Check if prompt text already exists to avoid duplicates
-    const updated = [
-        promptData, 
-        ...saved.filter(item => item.prompt !== prompt)
-    ].slice(0, 8);
-    
-    localStorage.setItem('catgpt-v-3-generated', JSON.stringify(updated));
+${CATGPT_PERSONALITY}
+
+---
+
+Human asks: "${userQuestion}"
+CatGPT:`;
 }
 
-function getSavedPrompts() {
-    try {
-        const savedData = JSON.parse(localStorage.getItem('catgpt-v-3-generated')) || [];
+function createImageGenerationPrompt(userQuestion) {
+    return `Single-panel CatGPT webcomic, white background, thick black marker strokes. White cat with black patches, human with bob hair. Handwritten text.
+
+IMPORTANT: CatGPT's response MUST be 2-5 words ONLY. Make it funny, sarcastic, and dismissive. Examples: "Not your problem.", "I'd rather nap.", "Hard pass, human."
+
+Human asks: "${userQuestion}"
+CatGPT responds (2-5 words, funny):`;
+}
+
+function generateImageURL(prompt) {
+    return `${POLLINATIONS_API}/${encodeURIComponent(prompt)}?height=1024&width=1024&model=gptimage&enhance=true&image=${encodeURIComponent(ORIGINAL_CATGPT_IMAGE)}`;
+}
+
+async function fetchImageWithAuth(imageUrl) {
+    const response = await fetch(imageUrl, {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer pk_w3kAO902fOeFYiNm'
+        }
+    });
+    
+    
+    if (!response.ok) {
+        let errorDetails = '';
+        try {
+            const errorData = await response.json();
+            errorDetails = errorData.error?.message || JSON.stringify(errorData);
+        } catch (e) {
+            errorDetails = await response.text();
+        }
         
-        // Handle backward compatibility with old format (strings instead of objects)
-        return savedData.map(item => {
-            // If the item is a string (old format), convert to object format
-            if (typeof item === 'string') {
-                return { prompt: item, imageUrl: null };
-            }
-            // Otherwise return the item as is (already in object format)
-            return item;
+        // Log detailed error for debugging only (console)
+        console.error('API Error Details:', {
+            status: response.status,
+            statusText: response.statusText,
+            details: errorDetails,
+            url: imageUrl
         });
+        
+        // Don't expose backend errors to users - throw generic error
+        throw new Error(`API_ERROR_${response.status}`);
+    }
+    
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+}
+
+function saveGeneratedMeme(prompt, blobUrl) {
+    const saved = getSavedMemes();
+    const now = Date.now();
+    const newMeme = { prompt, url: blobUrl, timestamp: now };
+    const updated = [newMeme, ...saved.filter(m => m.prompt !== prompt)].slice(0, 8);
+    localStorage.setItem('catgpt-generated', JSON.stringify(updated));
+}
+
+function getSavedMemes() {
+    try {
+        const data = JSON.parse(localStorage.getItem('catgpt-generated')) || [];
+        cleanupOldMemes(data);
+        return data;
     } catch {
         return [];
     }
 }
 
-// URL parameter handling for shared prompts
+function getSavedPrompts() {
+    return getSavedMemes().map(m => m.prompt);
+}
+
+function cleanupOldMemes(memes) {
+    const ONE_MONTH = 30 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    const filtered = memes.filter(m => (now - m.timestamp) < ONE_MONTH);
+    if (filtered.length !== memes.length) {
+        localStorage.setItem('catgpt-generated', JSON.stringify(filtered));
+    }
+    return filtered;
+}
+
 function getURLPrompt() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('prompt');
 }
 
-// Get image URL from parameters
-function getURLImage() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('image');
-}
-
-function setURLPrompt(prompt, imageUrl = null) {
+function setURLPrompt(prompt) {
     const url = new URL(window.location);
-    
-    // Handle prompt parameter
     if (prompt) {
         url.searchParams.set('prompt', prompt);
-        
-        // Add image parameter if we have an uploaded image
-        if (uploadedImageUrl) {
-            url.searchParams.set('image', uploadedImageUrl);
-        } else {
-            url.searchParams.delete('image');
-        }
     } else {
         url.searchParams.delete('prompt');
-        url.searchParams.delete('image');
     }
-    
     window.history.replaceState({}, '', url);
 }
 
 function handleURLPrompt() {
     const urlPrompt = getURLPrompt();
-    const urlImage = getURLImage();
-    
-    // If there's an image URL in the parameters, use it and show thumbnail
-    if (urlImage) {
-        uploadedImageUrl = urlImage;
-        showThumbnail(urlImage);
-    }
-    
     if (urlPrompt) {
         userInput.value = urlPrompt;
-        // Auto-generate the meme if prompt is in URL
         setTimeout(() => {
             generateMeme();
         }, 500);
     }
 }
 
-// DOM Elements
 const userInput = document.getElementById('userInput');
 const generateBtn = document.getElementById('generateBtn');
 const loadingIndicator = document.getElementById('loadingIndicator');
@@ -133,21 +149,15 @@ const generatedMeme = document.getElementById('generatedMeme');
 const downloadBtn = document.getElementById('downloadBtn');
 const shareBtn = document.getElementById('shareBtn');
 const examplesGrid = document.getElementById('examplesGrid');
+const yourMemesGrid = document.getElementById('yourMemesGrid');
 
-// Image upload elements
-const imageUpload = document.getElementById('imageUpload');
-const imageUploadContainer = document.getElementById('imageUploadContainer');
-const imageThumbnailContainer = document.getElementById('imageThumbnailContainer');
-const imageThumbnail = document.getElementById('imageThumbnail');
-const removeImageBtn = document.getElementById('removeImageBtn');
-
-// Initialize app
 document.addEventListener('DOMContentLoaded', () => {
+    cleanupOldMemes(getSavedMemes());
+    loadUserMemes();
     loadExamples();
     loadRandomCatFact();
-    handleURLPrompt(); // Handle URL prompt if present
+    handleURLPrompt();
     
-    // Add event listeners
     generateBtn.addEventListener('click', generateMeme);
     downloadBtn.addEventListener('click', downloadMeme);
     shareBtn.addEventListener('click', shareMeme);
@@ -158,57 +168,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Image upload event listener
-    imageUpload.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-            const file = e.target.files[0];
-            const fileName = file.name;
-            const fileSize = (file.size / 1024 / 1024).toFixed(2);
-            
-            // Show preview of selected file
-            const objectUrl = URL.createObjectURL(file);
-            showThumbnail(objectUrl);
-            
-            showNotification(`Selected: ${fileName} (${fileSize}MB)`, 'info');
-        } else {
-            uploadedImageUrl = null;
-            hideThumbnail();
-        }
-    });
-    
-    // Remove image button event listener
-    removeImageBtn.addEventListener('click', () => {
-        uploadedImageUrl = null;
-        imageUpload.value = '';
-        hideThumbnail();
-        showNotification('Image removed', 'info');
-    });
-    
-        // Add some fun to the page
     addFloatingEmojis();
 });
 
-// Show thumbnail preview of uploaded image
-function showThumbnail(imageUrl) {
-    // Set the thumbnail image source
-    imageThumbnail.src = imageUrl;
-    
-    // Show the thumbnail container and hide the file input
-    imageUploadContainer.classList.add('hidden');
-    imageThumbnailContainer.classList.remove('hidden');
-}
-
-// Hide thumbnail preview and show file input
-function hideThumbnail() {
-    // Clear the thumbnail image source
-    imageThumbnail.src = '';
-    
-    // Hide the thumbnail container and show the file input
-    imageThumbnailContainer.classList.add('hidden');
-    imageUploadContainer.classList.remove('hidden');
-}
-
-// Generate meme function
 async function generateMeme() {
     const userQuestion = userInput.value.trim();
     
@@ -217,39 +179,8 @@ async function generateMeme() {
         return;
     }
     
-    // Handle image upload if file selected
-    const imageFile = imageUpload.files[0];
-    
-    // Only try to upload a new image if there's a file in the input
-    // This preserves the existing uploadedImageUrl during retries
-    if (imageFile) {
-        generateBtn.disabled = true;
-        generateBtn.innerHTML = '📤 Uploading image...';
-        
-        try {
-            uploadedImageUrl = await handleImageUpload(imageFile, showNotification);
-            if (!uploadedImageUrl) {
-                // Image upload failed, enable button and return
-                resetButton();
-                return;
-            }
-            
-            // Show thumbnail of the uploaded image
-            showThumbnail(uploadedImageUrl);
-        } catch (error) {
-            showNotification('Failed to upload image. Using default CatGPT style.', 'warning');
-            uploadedImageUrl = null;
-            hideThumbnail();
-        }
-    }
-    
-    // Debug log to confirm we still have the image URL
-    console.log('Using image URL:', uploadedImageUrl);
-    
-    // Update URL immediately when prompt is submitted
     setURLPrompt(userQuestion);
     
-    // Show loading state with disabled button
     generateBtn.disabled = true;
     generateBtn.innerHTML = '🐾 Generating... (~30s)';
     generateBtn.style.opacity = '0.6';
@@ -258,48 +189,37 @@ async function generateMeme() {
     loadingIndicator.classList.remove('hidden');
     resultSection.classList.add('hidden');
     
-    // Start fake Gen-Z progress
     startFakeProgress();
-    
-    // Start cat animation during loading
     startCatAnimation();
     
-    // Create the full prompt using utility function - pass if we have an uploaded image
-    const fullPrompt = createCatGPTPrompt(userQuestion, !!uploadedImageUrl);
+    const fullPrompt = createCatGPTPrompt(userQuestion);
+    const imagePrompt = createImageGenerationPrompt(userQuestion);
     
     try {
-        // Generate the image URL using utility function from ai.js
-        const imageUrl = generateImageURL(fullPrompt, uploadedImageUrl);
+        const imageUrl = generateImageURL(imagePrompt);
         
-        // Create a new image element to handle loading
-        const img = new Image();
+        let imageLoadTimeout;
         
-        img.onload = () => {
-            // Update UI with generated image
-            generatedMeme.src = imageUrl;
-            generatedMeme.alt = `CatGPT response to: ${userQuestion}`;
-            
-            // Show result section
-            loadingIndicator.classList.add('hidden');
-            resultSection.classList.remove('hidden');
+        imageLoadTimeout = setTimeout(() => {
             resetButton();
-            
-            // Save the prompt for future examples
-            saveGeneratedPrompt(userQuestion);
-            
-            // Add a little celebration
-            celebrate();
-        };
+            handleImageError('timeout');
+        }, 45000);
         
-        img.onerror = () => {
-            // Image failed to load, trigger retry system
-            console.log('Image failed to load, triggering retry');
+        try {
+            const blobUrl = await fetchImageWithAuth(imageUrl);
+            clearTimeout(imageLoadTimeout);
+            generatedMeme.src = blobUrl;
+            showResult();
             resetButton();
-            // Start the retry countdown
-            startRetryCountdown();
-        };
-        
-        img.src = imageUrl;
+            stopCatAnimation();
+            saveGeneratedMeme(userQuestion, imageUrl);
+            refreshExamples();
+        } catch (fetchError) {
+            clearTimeout(imageLoadTimeout);
+            console.error('Generation error:', fetchError);
+            resetButton();
+            handleImageError('general');
+        }
         
     } catch (error) {
         console.error('Error generating meme:', error);
@@ -308,8 +228,7 @@ async function generateMeme() {
     }
 }
 
-// Handle image loading errors with funny cat messages
-function handleImageError(errorType = 'general') {
+function handleImageError(errorType = 'general', errorMessage = '') {
     const catMessages = [
         "😾 *yawns* The art studio is full of sleeping cats... try again in 30 seconds!",
         "🐱 *stretches paws* Too many humans asking questions! I need a catnap... wait 30 seconds, please.",
@@ -331,17 +250,14 @@ function handleImageError(errorType = 'general') {
     }
     
     showNotification(specificMessage, 'error');
-    stopCatAnimation(); // Stop the cat animation on error
+    stopCatAnimation();
     
-    // Start automatic retry countdown
     startRetryCountdown();
 }
 
-// Auto-retry with Gen-Z countdown
 function startRetryCountdown() {
     let countdown = 10;
     
-    // Start different cat animation for retry state
     startCatAnimation('retry');
     
     const retryContainer = document.createElement('div');
@@ -409,7 +325,6 @@ function startRetryCountdown() {
     retryContainer.appendChild(cancelBtn);
     document.body.appendChild(retryContainer);
     
-    // Countdown timer
     const countdownInterval = setInterval(() => {
         countdown--;
         countdownDisplay.textContent = countdown;
@@ -417,24 +332,20 @@ function startRetryCountdown() {
         if (countdown <= 0) {
             clearInterval(countdownInterval);
             retryContainer.remove();
-            stopCatAnimation(); // Stop retry cats
-            // Auto-retry
+            stopCatAnimation();
             generateMeme();
         }
     }, 1000);
     
-    // Cancel button
     cancelBtn.addEventListener('click', () => {
         clearInterval(countdownInterval);
         retryContainer.remove();
-        stopCatAnimation(); // Stop retry cats when cancelled
+        stopCatAnimation();
     });
     
-    // Initial countdown display
     countdownDisplay.textContent = countdown;
 }
 
-// Cat animation during loading
 let catAnimationInterval;
 
 function startCatAnimation(mode = 'loading') {
@@ -442,7 +353,7 @@ function startCatAnimation(mode = 'loading') {
     const retryCatEmojis = ['😾', '😿', '🙄', '😤', '😑', '😒', '😔', '🐱‍👤', '😸', '😼'];
     
     const catEmojis = mode === 'retry' ? retryCatEmojis : loadingCatEmojis;
-    const speed = mode === 'retry' ? 800 : 400; // Slower for retry state
+    const speed = mode === 'retry' ? 800 : 400;
     
     catAnimationInterval = setInterval(() => {
         const cat = document.createElement('div');
@@ -461,7 +372,6 @@ function startCatAnimation(mode = 'loading') {
         cat.textContent = catEmojis[Math.floor(Math.random() * catEmojis.length)];
         document.body.appendChild(cat);
         
-        // Remove after animation
         setTimeout(() => {
             if (cat.parentNode) {
                 cat.remove();
@@ -476,30 +386,19 @@ function stopCatAnimation() {
         catAnimationInterval = null;
     }
     
-    // Remove any existing cats
     document.querySelectorAll('[style*="catSlide"]').forEach(cat => cat.remove());
 }
 
-// Reset button to original state
 function resetButton() {
     generateBtn.disabled = false;
-    generateBtn.innerHTML = `
-        <span class="btn-text">Generate Meme</span>
-        <span class="btn-emoji">🎨</span>
-    `;
-    generateBtn.style.opacity = '';
-    generateBtn.style.cursor = '';
-    
-    // Only clear the file input, but DON'T reset the uploadedImageUrl
-    // This allows the image URL to persist during retries
-    imageUpload.value = '';
-    
+    generateBtn.innerHTML = 'Generate CatGPT Meme 🎨';
+    generateBtn.style.opacity = '1';
+    generateBtn.style.cursor = 'pointer';
     loadingIndicator.classList.add('hidden');
     stopFakeProgress();
-    stopCatAnimation(); // Stop the cat animation on reset
+    stopCatAnimation();
 }
 
-// Fake Gen-Z progress messages
 let progressInterval;
 let progressStep = 0;
 
@@ -533,7 +432,6 @@ function startFakeProgress() {
     
     loadingIndicator.appendChild(progressText);
     
-    // Update progress every 2.5 seconds
     progressInterval = setInterval(() => {
         if (progressStep < progressMessages.length) {
             progressText.textContent = progressMessages[progressStep];
@@ -543,7 +441,6 @@ function startFakeProgress() {
         }
     }, 2500);
     
-    // Start with first message immediately
     progressText.textContent = progressMessages[0];
     progressStep = 1;
 }
@@ -559,18 +456,14 @@ function stopFakeProgress() {
     }
 }
 
-// Show the result
 function showResult() {
     resultSection.classList.remove('hidden');
     
-    // Smooth scroll to result
     resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
     
-    // Add celebration animation
     celebrate();
 }
 
-// Download meme
 async function downloadMeme() {
     try {
         const response = await fetch(generatedMeme.src);
@@ -599,7 +492,6 @@ async function shareMeme() {
     const currentURL = window.location.href;
     
     try {
-        // Copy URL to clipboard
         await navigator.clipboard.writeText(currentURL);
         showNotification('Link copied to clipboard! 📋', 'success');
     } catch (error) {
@@ -610,134 +502,97 @@ async function shareMeme() {
 
 
 
-// Load example memes
-function loadExamples() {
-    // Clear existing examples
-    examplesGrid.innerHTML = '';
+function loadUserMemes() {
+    yourMemesGrid.innerHTML = '';
     
-    // Get saved prompts and combine with default examples
-    const savedPrompts = getSavedPrompts();
+    const savedMemes = getSavedMemes();
     
-    // Combine saved prompts with default examples (now both using the same object format)
-    const allPrompts = [...savedPrompts, ...EXAMPLES];
+    if (savedMemes.length === 0) {
+        const emptyMessage = document.createElement('p');
+        emptyMessage.textContent = 'No memes yet! Generate one to see it here. 🎨';
+        emptyMessage.style.cssText = `
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--color-secondary);
+            padding: 2rem;
+            font-style: italic;
+        `;
+        yourMemesGrid.appendChild(emptyMessage);
+        return;
+    }
     
-    // Create cards for each prompt
-    allPrompts.forEach((promptData, index) => {
-        const card = createExampleCard(promptData, index, index < savedPrompts.length);
-        examplesGrid.appendChild(card);
+    // Show ONLY user-generated memes from localStorage
+    savedMemes.forEach((meme, index) => {
+        const card = createUserMemeCard(meme.prompt, index, meme.url);
+        if (card) yourMemesGrid.appendChild(card);
     });
 }
 
-// Refresh examples (useful after generating new memes)
+function loadExamples() {
+    examplesGrid.innerHTML = '';
+    
+    // Show ONLY examples from EXAMPLES_MAP
+    const examplePrompts = Array.from(EXAMPLES_MAP.keys());
+    examplePrompts.forEach((prompt, index) => {
+        const card = createExampleCard(prompt, index);
+        if (card) examplesGrid.appendChild(card);
+    });
+}
+
 function refreshExamples() {
+    loadUserMemes();
     loadExamples();
 }
 
-// Create example card
-function createExampleCard(promptData, index, isUserGenerated = false) {
-    // Handle both new format (object with prompt and imageUrl) and old format (string)
-    const promptValue = typeof promptData === 'string' ? promptData : promptData.prompt;
-    const customImageUrl = typeof promptData === 'object' ? promptData.imageUrl : null;
+function createUserMemeCard(prompt, index, imageUrl) {
+    // User memes: use stored public URL from localStorage
+    if (!imageUrl) {
+        console.warn(`User meme has no URL: "${prompt}"`);
+        return null;
+    }
     
     const card = document.createElement('div');
     card.className = 'example-card';
     card.style.animationDelay = `${index * 0.1}s`;
+    card.style.border = '2px solid var(--color-accent)';
+    card.style.boxShadow = '0 0 10px rgba(255, 105, 180, 0.3)';
     
-    // Add special styling for user-generated prompts
-    if (isUserGenerated) {
-        card.style.border = '2px solid var(--color-accent)';
-        card.style.boxShadow = '0 0 10px rgba(255, 105, 180, 0.3)';
-    }
-    
-    // Generate dynamic image URL using utility functions
-    const examplePrompt = createCatGPTPrompt(promptValue, !!customImageUrl);
-    
-    // If the example has a custom image URL, use it in generateImageURL
-    let tempUploadedImageUrl = null;
-    if (customImageUrl) {
-        // Temporarily save the current uploadedImageUrl
-        tempUploadedImageUrl = uploadedImageUrl;
-        // Set uploadedImageUrl to the example's custom image
-        uploadedImageUrl = customImageUrl;
-    }
-    
-    // Generate the image URL using ai.js function
-    const imageUrl = generateImageURL(examplePrompt, customImageUrl);
-    
-    // Restore the original uploadedImageUrl if we modified it
-    if (customImageUrl) {
-        uploadedImageUrl = tempUploadedImageUrl;
-    }
-    
+    // Display the stored image from public URL
     const img = document.createElement('img');
     img.src = imageUrl;
-    img.alt = promptValue;
+    img.alt = prompt;
     img.loading = 'lazy';
     
-    const promptElement = document.createElement('p');
-    promptElement.textContent = `"${promptValue}"`;
-    promptElement.style.fontStyle = 'italic';
-    promptElement.style.fontSize = '0.9rem';
-    promptElement.style.color = 'var(--color-primary)';
-    promptElement.style.textAlign = 'center';
-    promptElement.style.margin = '0.5rem 0';
+    const badge = document.createElement('div');
+    badge.textContent = '✨ Your Meme';
+    badge.style.cssText = `
+        background: var(--gradient-1);
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    `;
     
-    // Add "Your Meme" badge for user-generated content
-    if (isUserGenerated) {
-        const badge = document.createElement('div');
-        badge.textContent = '✨ Your Meme';
-        badge.style.cssText = `
-            background: var(--gradient-1);
-            color: white;
-            padding: 0.2rem 0.5rem;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            text-align: center;
-        `;
-        card.appendChild(badge);
-    }
+    const promptText = document.createElement('p');
+    promptText.textContent = `"${prompt}"`;
+    promptText.style.fontStyle = 'italic';
+    promptText.style.fontSize = '0.9rem';
+    promptText.style.color = 'var(--color-primary)';
+    promptText.style.textAlign = 'center';
+    promptText.style.margin = '0.5rem 0';
     
+    card.appendChild(badge);
     card.appendChild(img);
-    card.appendChild(promptElement);
+    card.appendChild(promptText);
     
-    // Add image icon badge if it has a custom image
-    if (customImageUrl) {
-        const imageBadge = document.createElement('div');
-        imageBadge.textContent = '🖼️ Custom Image';
-        imageBadge.style.cssText = `
-            background: var(--gradient-2);
-            color: white;
-            padding: 0.2rem 0.5rem;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            margin-top: 0.5rem;
-            text-align: center;
-        `;
-        card.appendChild(imageBadge);
-    }
-    
-    // Click to use this prompt and image (if available)
     card.addEventListener('click', () => {
-        // Set the prompt text in the input
-        userInput.value = promptValue;
+        userInput.value = prompt;
         userInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         userInput.focus();
         
-        // Set the image URL if this example has one
-        if (customImageUrl) {
-            uploadedImageUrl = customImageUrl;
-            showThumbnail(customImageUrl);
-            showNotification('Using custom image from example 🖼️', 'info');
-        } else {
-            // If no custom image, clear any existing one
-            uploadedImageUrl = null;
-            hideThumbnail();
-        }
-        
-        // Add a little animation to the input
         userInput.style.animation = 'pulse 0.5s';
         setTimeout(() => {
             userInput.style.animation = '';
@@ -745,7 +600,6 @@ function createExampleCard(promptData, index, isUserGenerated = false) {
         
         showNotification('Generating your meme! 🎨', 'info');
         
-        // Auto-generate the meme after a short delay
         setTimeout(() => {
             generateMeme();
         }, 800);
@@ -754,13 +608,59 @@ function createExampleCard(promptData, index, isUserGenerated = false) {
     return card;
 }
 
-// Show notification
+function createExampleCard(prompt, index) {
+    // Examples: ONLY from EXAMPLES_MAP
+    const imageUrl = EXAMPLES_MAP.get(prompt);
+    if (!imageUrl) {
+        console.warn(`Example "${prompt}" not found in EXAMPLES_MAP`);
+        return null;
+    }
+    
+    const card = document.createElement('div');
+    card.className = 'example-card';
+    card.style.animationDelay = `${index * 0.1}s`;
+    
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.alt = prompt;
+    img.loading = 'lazy';
+    
+    const promptText = document.createElement('p');
+    promptText.textContent = `"${prompt}"`;
+    promptText.style.fontStyle = 'italic';
+    promptText.style.fontSize = '0.9rem';
+    promptText.style.color = 'var(--color-primary)';
+    promptText.style.textAlign = 'center';
+    promptText.style.margin = '0.5rem 0';
+    
+    card.appendChild(img);
+    card.appendChild(promptText);
+    
+    card.addEventListener('click', () => {
+        userInput.value = prompt;
+        userInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        userInput.focus();
+        
+        userInput.style.animation = 'pulse 0.5s';
+        setTimeout(() => {
+            userInput.style.animation = '';
+        }, 500);
+        
+        showNotification('Generating your meme! 🎨', 'info');
+        
+        setTimeout(() => {
+            generateMeme();
+        }, 800);
+    });
+    
+    return card;
+}
+
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
     
-    // Styles for notification
     notification.style.cssText = `
         position: fixed;
         top: 20px;
@@ -785,7 +685,6 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// Celebration animation
 function celebrate() {
     const emojis = ['🎉', '✨', '🌟', '💫', '🎊'];
     const colors = ['#ff61d8', '#05ffa1', '#ffcc00'];
@@ -796,6 +695,8 @@ function celebrate() {
             emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
             emoji.style.cssText = `
                 position: fixed;
+                left: ${Math.random() * 100}%;
+                top: -50px;
                 font-size: ${20 + Math.random() * 20}px;
                 color: ${colors[Math.floor(Math.random() * colors.length)]};
                 animation: fall ${2 + Math.random() * 2}s ease-in forwards;
@@ -812,7 +713,6 @@ function celebrate() {
     }
 }
 
-// Add floating emojis for fun
 function addFloatingEmojis() {
     const emojis = ['🐱', '💭', '✨', '🌟', '😸', '🐾', '💜', '🎨'];
     const container = document.querySelector('.container');
@@ -835,7 +735,6 @@ function addFloatingEmojis() {
     });
 }
 
-// Easter egg: Konami code
 let konamiCode = [];
 const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 
@@ -848,7 +747,6 @@ document.addEventListener('keydown', (e) => {
         showNotification('🌈 Secret mode activated! You found the easter egg! 🦄', 'success');
         celebrate();
         
-        // Add special cat mode
         document.querySelectorAll('h1, h2, h3').forEach(el => {
             el.innerHTML = el.innerHTML.replace(/Cat/g, '😸Cat😸');
         });
@@ -859,7 +757,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Add random cat facts
 const catFacts = [
     "Cats spend 70% of their lives sleeping 😴",
     "A group of cats is called a 'clowder' 🐱🐱🐱",
@@ -868,7 +765,6 @@ const catFacts = [
     "Cats can rotate their ears 180 degrees 👂"
 ];
 
-// Load random cat fact
 function loadRandomCatFact() {
     setTimeout(() => {
         const randomFact = catFacts[Math.floor(Math.random() * catFacts.length)];
@@ -876,7 +772,6 @@ function loadRandomCatFact() {
     }, 3000);
 }
 
-// Add CSS animations
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
@@ -962,7 +857,6 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Add rainbow animation
 const rainbowStyle = document.createElement('style');
 rainbowStyle.textContent = `
     @keyframes rainbow {
