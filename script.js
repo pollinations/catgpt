@@ -212,7 +212,7 @@ async function generateMeme() {
             showResult();
             resetButton();
             stopCatAnimation();
-            saveGeneratedMeme(userQuestion, blobUrl);
+            saveGeneratedMeme(userQuestion, imageUrl);
             refreshExamples();
         } catch (fetchError) {
             clearTimeout(imageLoadTimeout);
@@ -544,10 +544,10 @@ function refreshExamples() {
     loadExamples();
 }
 
-function createUserMemeCard(prompt, index, blobUrl) {
-    // User memes: ONLY use stored blob URL from localStorage
-    if (!blobUrl) {
-        console.warn(`User meme has no blob URL: "${prompt}"`);
+function createUserMemeCard(prompt, index, imageUrl) {
+    // User memes: use stored public URL from localStorage
+    if (!imageUrl) {
+        console.warn(`User meme has no URL: "${prompt}"`);
         return null;
     }
     
@@ -557,9 +557,9 @@ function createUserMemeCard(prompt, index, blobUrl) {
     card.style.border = '2px solid var(--color-accent)';
     card.style.boxShadow = '0 0 10px rgba(255, 105, 180, 0.3)';
     
-    // Display the stored blob image
+    // Display the stored image from public URL
     const img = document.createElement('img');
-    img.src = blobUrl;
+    img.src = imageUrl;
     img.alt = prompt;
     img.loading = 'lazy';
     
