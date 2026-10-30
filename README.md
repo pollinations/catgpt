@@ -59,9 +59,9 @@ Here are some AI-generated CatGPT memes created with our generator:
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Pure HTML, CSS, and JavaScript (no frameworks needed!)
+- **Frontend**: HTML, CSS and JavaScript, with a React account menu from the published Pollinations UI package and a Vite build
 - **AI Service**: [gen.pollinations.ai](https://gen.pollinations.ai): Gemini 3.1 Flash-Lite Image (`nanobanana-2-lite`) with `gptimage` fallback, powered by Claude Fast for text responses
-- **Image Upload**: Pollinations media storage for private references and public generated memes
+- **Image Upload**: Pollinations media storage for unlisted references and public generated memes
 - **Design**: Psychedelic Gen-Z aesthetic with animated elements
 
 ## 🔧 Architecture & Gateway
@@ -90,7 +90,8 @@ python3 -m http.server 8080 --directory dist
 
 `dist/` contains only the built website and its assets. The primary address is
 `https://catgpt.pollinations.app`; the `.ai` and legacy GitHub Pages addresses
-redirect there after the verified cutover. `generated-examples/` preserves the
+now redirect there. Legacy query strings and fragments are discarded to avoid
+forwarding credentials. `generated-examples/` preserves the
 repository's original image links. Shared links populate the prompt; generation
 starts only after a click. Example cards use bundled images and spend no Pollen.
 
@@ -101,11 +102,11 @@ enables deployment on production pushes. Promote `main` through a PR to
 The GitHub `production` environment holds `POLLINATIONS_API_KEY`, a zero-budget,
 no-generation key with `account:machines` access. Never commit its value.
 
-Before the first cutover, verify login, generation, reference uploads, downloads,
+For future releases, verify login, generation, reference uploads, downloads,
 gallery and shared links on `.app`. The original Cloudflare Pages deployment is
 retained for rollback: disable the new workflow and restore the old routing.
-GitHub Pages uses `codex/catgpt-legacy-pages`, preserving the original deployment
-until its redirect is enabled.
+GitHub Pages uses `codex/catgpt-legacy-pages`, serving a redirect while preserving
+the original asset paths.
 
 For an authenticated SDK check, set `POLLINATIONS_API_KEY` securely and run
 `npm run test:live`. It generates and publishes one meme, then verifies the gallery
@@ -125,7 +126,7 @@ Keep your cats happy with premium pet food from our sponsor [PuraPep](https://ww
 
 ## 🎯 How to Use
 
-1. Visit the [CatGPT Meme Generator](https://pollinations.github.io/catgpt/)
+1. Visit the [CatGPT Meme Generator](https://catgpt.pollinations.app/)
 2. Log in with your Pollinations account
 3. Type your question in the text box (optional: upload a selfie to be caricatured)
 4. Click "Generate Meme"
