@@ -11,7 +11,7 @@ permissions:
 jobs:
   deploy:
     if: github.event_name == 'workflow_dispatch' || vars.AUTO_DEPLOY == 'true'
-    uses: pollinations/pollinations/.github/workflows/deploy-pollinations-site.yml@154eec6262d09d1c034c1984caa4503fd3baca75
+    uses: pollinations/pollinations/.github/workflows/deploy-pollinations-site.yml@75c8b4c4c409ce6537b8fb73c054c0155617a7f9
     with:
       site-name: catgpt
     secrets:
