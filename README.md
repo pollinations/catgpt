@@ -102,6 +102,8 @@ enables deployment on production pushes. Promote `main` through a PR to
 The GitHub `production` environment holds `POLLINATIONS_API_KEY`, a zero-budget,
 no-generation key with `account:machines` access. Never commit its value.
 
+CI calls the [shared Sites workflow](https://github.com/pollinations/pollinations/blob/75c8b4c4c409ce6537b8fb73c054c0155617a7f9/.github/workflows/deploy-pollinations-site.yml), pinned to a reviewed commit. It builds and tests without the deployment key, then publishes and verifies every file on a separate runner using the published CLI. Reverting the workflow change restores the previous deployment procedure.
+
 For future releases, verify login, generation, reference uploads, downloads,
 gallery and shared links on `.app`. The original Cloudflare Pages deployment is
 retained for rollback: disable the new workflow and restore the old routing.
