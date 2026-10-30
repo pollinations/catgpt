@@ -8,34 +8,11 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: catgpt-production
-  cancel-in-progress: false
-
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/production' && (github.event_name == 'workflow_dispatch' || vars.AUTO_DEPLOY == 'true')
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: "24"
-          cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
-      - name: Publish CatGPT
-        env:
-          POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
-        run: npm run deploy
-      - name: Verify deployed files
-        run: |
-          set -euo pipefail
-          while IFS= read -r -d '' file; do
-            curl --fail --location --silent --show-error --retry 5 --retry-all-errors \
-              --retry-delay 5 --max-time 30 \
-              "https://catgpt.pollinations.app/${file#dist/}" --output /tmp/catgpt-asset
-            cmp "$file" /tmp/catgpt-asset
-          done < <(find dist -type f -print0)
+    if: github.event_name == 'workflow_dispatch' || vars.AUTO_DEPLOY == 'true'
+    uses: pollinations/pollinations/.github/workflows/deploy-pollinations-site.yml@154eec6262d09d1c034c1984caa4503fd3baca75
+    with:
+      site-name: catgpt
+    secrets:
+      POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
