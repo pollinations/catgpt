@@ -88,32 +88,32 @@ npm run build
 python3 -m http.server 8080 --directory dist
 ```
 
-`dist/` contains only the website and its assets. The legacy GitHub Pages deployment will be preserved until the Sites cutover;
-`generated-examples/` preserves its existing image links.
-The new primary address will be `https://catgpt.pollinations.app`.
-Shared links populate the prompt; generation starts only after a click.
-Example cards use bundled images and do not spend Pollen.
+`dist/` contains only the built website and its assets. The primary address is
+`https://catgpt.pollinations.app`; the `.ai` and legacy GitHub Pages addresses
+redirect there after the verified cutover. `generated-examples/` preserves the
+repository's original image links. Shared links populate the prompt; generation
+starts only after a click. Example cards use bundled images and spend no Pollen.
 
 Deployment runs through **Deploy / Pollinations production** on the `production`
-branch. The GitHub `production` environment needs `POLLINATIONS_API_KEY` for the
-owning Pollinations account, with `account:machines` permission. Add credentials
-only with the owner's approval; never commit them. The first deploy must verify
-ownership of the `catgpt` site name and available account capacity.
+branch, using the published CLI and Polli's Sites account. `AUTO_DEPLOY=true`
+enables deployment on production pushes. Promote `main` through a PR to
+`production`; CI builds, publishes, and compares every deployed file with `dist/`.
+The GitHub `production` environment holds `POLLINATIONS_API_KEY`, a zero-budget,
+no-generation key with `account:machines` access. Never commit its value.
 
-Keep `AUTO_DEPLOY` unset until the monorepo deployment has been removed from its
-production branch. Use a manual workflow dispatch for initial verification, then
-set `AUTO_DEPLOY=true` after the handoff. Promote `main` through a PR to
-`production` for later deployments.
+Before the first cutover, verify login, generation, reference uploads, downloads,
+gallery and shared links on `.app`. The original Cloudflare Pages deployment is
+retained for rollback: disable the new workflow and restore the old routing.
+GitHub Pages uses `codex/catgpt-legacy-pages`, preserving the original deployment
+until its redirect is enabled.
 
-Before redirecting the old address, register the new login callback and verify
-login, generation, uploads, downloads, gallery, and shared links on the deployed
-site. Keep the old Pages deployment available until this succeeds. To roll back,
-disable the new workflow and restore the old address routing.
+For an authenticated SDK check, set `POLLINATIONS_API_KEY` securely and run
+`npm run test:live`. It generates and publishes one meme, then verifies the gallery
+and download. This requires a generation key, not the deployment-only CI key.
 
 This migration preserves the original repository history and CatGPT's monorepo
-history through `c8c370b6918a60dda574f2610df6d553a2a71170`, including the pending
+history through `c8c370b6918a60dda574f2610df6d553a2a71170`, including the
 [image authentication fix](https://github.com/pollinations/pollinations/pull/18754).
-Complete that fix and the migration checks before switching deployment ownership.
 
 ## 💡 The Story
 
