@@ -71,6 +71,44 @@ The app uses the unified `gen.pollinations.ai` API gateway:
 - **Authentication**: Seamless Pollen balance authorization via [enter.pollinations.ai](https://enter.pollinations.ai)
 - **Media storage**: Tagged public archiving via [media.pollinations.ai](https://media.pollinations.ai)
 
+## Development and deployment
+
+Requires Node.js 24. The browser app stays plain HTML, CSS and JavaScript;
+its API calls use public Pollinations endpoints. Deployment uses the published
+`@pollinations/cli` package, with no monorepo files or Cloudflare credentials.
+
+```sh
+npm ci
+npm test
+npm run build
+python3 -m http.server 8080 --directory dist
+```
+
+`dist/` contains only the website and its assets. GitHub Pages can still serve
+this repository's root; `generated-examples/` preserves its existing image links.
+The planned primary address is `https://catgpt.pollinations.app`.
+
+Deployment runs through **Deploy / Pollinations production** on the `production`
+branch. The GitHub `production` environment needs `POLLINATIONS_API_KEY` for the
+owning Pollinations account, with `account:machines` permission. Add credentials
+only with the owner's approval; never commit them. The first deploy must verify
+ownership of the `catgpt` site name and available account capacity.
+
+Keep `AUTO_DEPLOY` unset until the monorepo deployment has been removed from its
+production branch. Use a manual workflow dispatch for initial verification, then
+set `AUTO_DEPLOY=true` after the handoff. Promote `main` through a PR to
+`production` for later deployments.
+
+Before redirecting the old address, register the new login callback and verify
+login, generation, uploads, downloads, gallery, and shared links on the deployed
+site. Keep the old Pages deployment available until this succeeds. To roll back,
+disable the new workflow and restore the old address routing.
+
+This migration preserves the original repository history and CatGPT's monorepo
+history through `c8c370b6918a60dda574f2610df6d553a2a71170`, including the pending
+[image authentication fix](https://github.com/pollinations/pollinations/pull/18754).
+Complete that fix and the migration checks before switching deployment ownership.
+
 ## 💡 The Story
 
 This app started from a LinkedIn post announcing the collaboration between Thomas Haferlach (pollinations.ai) and Tanika Godbole. The goal is to create a fun, viral meme generator while ensuring fair attribution and revenue sharing with the original creator - something often overlooked in the AI space.

@@ -1,0 +1,16 @@
+{
+  "name": "catgpt",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "build": "node scripts/build.mjs",
+    "deploy": "polli sites deploy dist --name catgpt"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@pollinations/cli": "0.1.71",
+    "vitest": "4.1.12"
+  }
+}

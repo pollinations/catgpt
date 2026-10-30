@@ -1,0 +1,40 @@
+name: Deploy / Pollinations production
+
+on:
+  push:
+    branches: [production]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catgpt-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/production' && (github.event_name == 'workflow_dispatch' || vars.AUTO_DEPLOY == 'true')
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Publish CatGPT
+        env:
+          POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
+        run: npm run deploy
+      - name: Check deployed assets
+        run: |
+          set -euo pipefail
+          for path in / /ai.js /script.js /styles.css /images/original-catgpt.png /images/selfie-catgpt.png; do
+            curl --fail --silent --show-error --retry 5 --retry-all-errors \
+              --retry-delay 5 --max-time 30 \
+              "https://catgpt.pollinations.app$path" --output /dev/null
+          done

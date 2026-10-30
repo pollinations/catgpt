@@ -4,10 +4,10 @@ const API = "https://gen.pollinations.ai/image";
 const ENTER = "https://enter.pollinations.ai";
 const MEDIA = "https://media.pollinations.ai";
 const COMMUNITY_TAG = "catgpt";
-const ORIGINAL_CATGPT =
-    "https://raw.githubusercontent.com/pollinations/pollinations/refs/heads/main/apps/catgpt/images/original-catgpt.png";
-const SELFIE_CATGPT =
-    "https://raw.githubusercontent.com/pollinations/pollinations/refs/heads/main/apps/catgpt/images/selfie-catgpt.png";
+const ORIGINAL_CATGPT = new URL("./images/original-catgpt.png", import.meta.url)
+    .href;
+const SELFIE_CATGPT = new URL("./images/selfie-catgpt.png", import.meta.url)
+    .href;
 const AUTH_KEY = "catgpt_api_key";
 const APP_KEY = "pk_uWjreBEkxFAhjDHo";
 
