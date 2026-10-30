@@ -1,23 +1,18 @@
 // CatGPT Meme Generator — UI, state, and DOM logic
 
 import {
-    clearApiKey,
     createImageGenerationPrompt,
     EXAMPLE_PROMPTS,
-    extractApiKeyFromFragment,
-    fetchBalance,
     fetchCommunityMemes,
-    fetchImage,
-    fetchProfile,
     generateCatReply,
-    generateImageURL,
-    getAuthorizeUrl,
-    getStoredApiKey,
+    generateImage,
     handleImageUpload,
+    isAuthenticated,
     pickModel,
     publishMemeToGallery,
-    storeApiKey,
 } from "./ai.js";
+import { mountAuth } from "./auth.js";
+import { safeMediaUrl, shareUrl } from "./links.js";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -166,9 +161,13 @@ const STORAGE_KEY = "catgpt-generated";
 function getSavedMemes() {
     try {
         // Older entries can hold an image URL with the API key in it.
-        return (JSON.parse(localStorage.getItem(STORAGE_KEY)) || []).filter(
-            (meme) => !/[?&]key=/.test(meme.url),
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        const clean = saved.filter((meme) =>
+            safeMediaUrl(meme.url, window.location.href),
         );
+        if (clean.length !== saved.length)
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
+        return clean;
     } catch {
         return [];
     }
@@ -297,17 +296,7 @@ function resetButton() {
 
 // ── URL Sanitization ─────────────────────────────────────────────────────────
 
-function sanitizeUrl(url) {
-    if (!url || typeof url !== "string") return null;
-    try {
-        const parsed = new URL(url, window.location.href);
-        return ["http:", "https:", "blob:", "data:"].includes(parsed.protocol)
-            ? parsed.toString()
-            : null;
-    } catch {
-        return null;
-    }
-}
+const sanitizeUrl = (url) => safeMediaUrl(url, window.location.href);
 
 // ── Cards ────────────────────────────────────────────────────────────────────
 
@@ -361,25 +350,13 @@ function loadUserMemes() {
 
 function loadExamples() {
     dom.examplesGrid.innerHTML = "";
-    if (!getStoredApiKey()) return;
-    EXAMPLE_PROMPTS.forEach(async (q, i) => {
-        try {
-            const response = await fetchImage(
-                generateImageURL(
-                    createImageGenerationPrompt(q, "..."),
-                    activeModel,
-                ),
-            );
-            if (!response.ok) return;
-            const card = createMemeCard(
-                q,
-                i,
-                URL.createObjectURL(await response.blob()),
-            );
-            if (card) dom.examplesGrid.appendChild(card);
-        } catch (error) {
-            console.error("Example meme failed:", error);
-        }
+    EXAMPLE_PROMPTS.forEach((question, index) => {
+        const card = createMemeCard(
+            question,
+            index,
+            `./images/example${index + 1}.png`,
+        );
+        if (card) dom.examplesGrid.appendChild(card);
     });
 }
 
@@ -453,6 +430,11 @@ async function generateMeme() {
         return;
     }
 
+    if (!isAuthenticated()) {
+        notify("Connect your Pollinations account first", "warning");
+        return;
+    }
+
     const question = dom.userInput.value.trim();
     if (!question) {
         notify("Please enter a question for CatGPT! 😸", "warning");
@@ -470,32 +452,22 @@ async function generateMeme() {
         cancelled = true;
     };
 
-    const catReply = await generateCatReply(question, uploadedImageUrl);
-    if (cancelled) return;
-
-    const imageUrl = generateImageURL(
-        createImageGenerationPrompt(question, catReply, !!uploadedImageUrl),
-        activeModel,
-        uploadedImageUrl,
-    );
-
     try {
-        const response = await fetchImage(imageUrl);
+        const catReply = await generateCatReply(question, uploadedImageUrl);
+        if (cancelled) return;
+        const image = await generateImage(
+            createImageGenerationPrompt(question, catReply, !!uploadedImageUrl),
+            activeModel,
+            uploadedImageUrl,
+        );
         if (cancelled) return;
 
-        if (!response.ok) {
-            const text = await response.text().catch(() => "");
-            throw new Error(text.slice(0, 200) || `Error ${response.status}`);
-        }
-
-        // Archive the generated output publicly; uploaded references remain untagged.
-        const image = await response.blob();
-        if (cancelled) return;
-
-        let resultUrl = URL.createObjectURL(image);
+        const previewUrl = URL.createObjectURL(image);
+        let resultUrl = previewUrl;
         try {
             const published = await publishMemeToGallery(image);
             resultUrl = published.url;
+            URL.revokeObjectURL(previewUrl);
             // Only a published meme has a lasting URL worth saving.
             saveGeneratedMeme(question, resultUrl);
             loadCommunityMemes();
@@ -507,6 +479,8 @@ async function generateMeme() {
             );
         }
 
+        if (dom.generatedMeme.src.startsWith("blob:"))
+            URL.revokeObjectURL(dom.generatedMeme.src);
         dom.generatedMeme.src = resultUrl;
 
         resetButton();
@@ -550,9 +524,9 @@ async function shareMeme() {
         return;
     }
     try {
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(shareUrl(window.location.href));
         notify(
-            "Link copied! Recipients will see the meme auto-generate 📋",
+            "Link copied! Recipients can open the prompt and generate their own meme 📋",
             "success",
         );
     } catch {
@@ -562,90 +536,30 @@ async function shareMeme() {
 
 // ── BYOP Auth ────────────────────────────────────────────────────────────────
 
-function handleAuthRedirect() {
-    const key = extractApiKeyFromFragment();
-    if (!key) return;
-    storeApiKey(key);
-    window.history.replaceState(
-        {},
-        "",
-        window.location.pathname + window.location.search,
-    );
-    notify("Logged in! Using your Pollen balance now.", "success");
-}
-
-async function updateAuthUI({ skipModelPick = false } = {}) {
-    const loggedOutEl = $("authLoggedOut");
-    const loggedInEl = $("authLoggedIn");
-    if (!loggedOutEl || !loggedInEl) return;
-
-    $("authLoginBtn").onclick = () => {
-        window.location.href = getAuthorizeUrl();
-    };
-    $("authLogoutBtn").onclick = () => {
-        clearApiKey();
-        updateAuthUI();
-        notify("Logged out. Log in to use CatGPT.");
-    };
-
-    const generatorSection = document.querySelector(".generator-section");
-    const heroHeader = document.querySelector("header");
-
-    const apiKey = getStoredApiKey();
-    if (!apiKey) {
-        show(loggedOutEl);
-        hide(loggedInEl);
-        hide(generatorSection);
-        show(heroHeader);
+async function updateAuthUI() {
+    const loggedIn = isAuthenticated();
+    document
+        .querySelector(".generator-section")
+        .classList.toggle("hidden", !loggedIn);
+    document.querySelector("header").classList.toggle("hidden", loggedIn);
+    if (!loggedIn) {
+        if (currentAbort) currentAbort();
+        resetButton();
         return;
     }
-
-    hide(loggedOutEl);
-    show(loggedInEl);
-    show(generatorSection);
-    hide(heroHeader);
-    $("authApiKey").textContent = `${apiKey.substring(0, 4)}••••••••`;
-
-    // Pick best available model (skip if URL param already set one)
-    if (!skipModelPick) {
-        pickModel(apiKey).then(({ model, isPremium }) => {
-            setActiveModel(model);
-            const upsellEl = $("modelUpsell");
-            isPremium ? hide(upsellEl) : show(upsellEl);
-        });
-    }
-
     try {
-        const [profile, balance] = await Promise.all([
-            fetchProfile(apiKey).catch(() => null),
-            fetchBalance(apiKey).catch(() => null),
-        ]);
-
-        if (profile) {
-            const name = profile.githubUsername || "User";
-            $("authUserName").textContent = name;
-
-            const avatarImg = $("authAvatar");
-            const avatarFallback = $("authAvatarFallback");
-            if (profile.image) {
-                avatarImg.src = profile.image;
-                show(avatarImg);
-                hide(avatarFallback);
-            } else {
-                hide(avatarImg);
-                show(avatarFallback);
-                avatarFallback.textContent = name.charAt(0).toUpperCase();
-            }
-        }
-
-        if (balance) {
-            $("authBalance").textContent =
-                `${balance.balance.toFixed(2)} pollen`;
-        }
-    } catch {
-        clearApiKey();
-        updateAuthUI();
-        notify("Session expired. Please log in again.", "warning");
+        const { model, isPremium } = await pickModel();
+        const requestedModel = getURLParams().model;
+        setActiveModel(
+            ["gptimage", "nanobanana", "nanobanana-2-lite"].includes(
+                requestedModel,
+            )
+                ? requestedModel
+                : model,
+        );
+        $("modelUpsell").classList.toggle("hidden", isPremium);
+    } catch (error) {
+        notify(error.message, "error");
     }
 }
 
@@ -702,13 +616,9 @@ function setupEventListeners() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    handleAuthRedirect();
-
-    // Read URL params first so model choice isn't overwritten by pickModel
-    const { prompt, image, model } = getURLParams();
-    if (model) setActiveModel(model);
-
-    updateAuthUI({ skipModelPick: !!model });
+    // Shared prompts are filled in; generation requires an explicit click.
+    const { prompt, image } = getURLParams();
+    mountAuth(updateAuthUI);
     loadUserMemes();
     loadExamples();
     loadCommunityMemes();
@@ -724,7 +634,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (prompt) {
         dom.userInput.value = prompt;
-        setTimeout(generateMeme, 500);
     }
 
     setupEventListeners();

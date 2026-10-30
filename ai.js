@@ -1,60 +1,20 @@
-// ai.js — API config, auth, prompt generation, image URL building, media upload
-
-const API = "https://gen.pollinations.ai/image";
-const ENTER = "https://enter.pollinations.ai";
+// API calls use the published SDK; authentication is owned by PolliProvider.
 const MEDIA = "https://media.pollinations.ai";
 const COMMUNITY_TAG = "catgpt";
 const ORIGINAL_CATGPT = new URL("./images/original-catgpt.png", import.meta.url)
     .href;
 const SELFIE_CATGPT = new URL("./images/selfie-catgpt.png", import.meta.url)
     .href;
-const AUTH_KEY = "catgpt_api_key";
-const APP_KEY = "pk_uWjreBEkxFAhjDHo";
+let client = null;
 
-// ── Auth ─────────────────────────────────────────────────────────────────────
-
-export const getStoredApiKey = () => {
-    try {
-        return localStorage.getItem(AUTH_KEY);
-    } catch {
-        return null;
-    }
-};
-export const storeApiKey = (key) => localStorage.setItem(AUTH_KEY, key);
-export const clearApiKey = () => localStorage.removeItem(AUTH_KEY);
-
-export function extractApiKeyFromFragment() {
-    const hash = window.location.hash.substring(1);
-    if (!hash) return null;
-    try {
-        const key = new URLSearchParams(hash).get("api_key");
-        return key && /^(sk_|plln_pk_|pk_)/.test(key) ? key : null;
-    } catch {
-        return null;
-    }
+export function setClient(nextClient) {
+    client = nextClient;
 }
-
-export function getAuthorizeUrl() {
-    const redirect = window.location.href.split("#")[0];
-    return `${ENTER}/authorize?${new URLSearchParams({
-        redirect_url: redirect,
-        app_key: APP_KEY,
-        budget: "5",
-        models: "openai/gpt-image-1-mini,google/gemini-3.1-flash-lite-image,google/gemini-2.5-flash-image,anthropic/claude-haiku-4.5",
-        permissions: "profile,usage",
-    })}`;
+export const isAuthenticated = () => client !== null;
+function requireClient() {
+    if (!client) throw new Error("Connect your Pollinations account first");
+    return client;
 }
-
-async function fetchAccount(apiKey, path) {
-    const res = await fetch(`${ENTER}/api/account/${path}`, {
-        headers: { Authorization: `Bearer ${apiKey}` },
-    });
-    if (!res.ok) throw new Error(`${path} fetch failed: ${res.status}`);
-    return res.json();
-}
-
-export const fetchProfile = (apiKey) => fetchAccount(apiKey, "profile");
-export const fetchBalance = (apiKey) => fetchAccount(apiKey, "balance");
 
 // ── Cat Reply ───────────────────────────────────────────────────────────────
 
@@ -73,29 +33,19 @@ const CAT_SYSTEM = `You are CatGPT — a supremely aloof, sarcastic cat who bare
 Respond with ONLY the cat's reply, nothing else. No quotes, no explanation, no preamble.`;
 
 export async function generateCatReply(question, imageUrl = null) {
-    const key = getStoredApiKey();
     const userContent = imageUrl
         ? [
               { type: "text", text: question },
               { type: "image_url", image_url: { url: imageUrl } },
           ]
         : question;
-    const res = await fetch("https://gen.pollinations.ai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            ...(key ? { Authorization: `Bearer ${key}` } : {}),
-        },
-        body: JSON.stringify({
-            model: "claude-fast",
-            messages: [
-                { role: "system", content: CAT_SYSTEM },
-                { role: "user", content: userContent },
-            ],
-        }),
-    });
-    if (!res.ok) throw new Error(`Cat reply failed: ${res.status}`);
-    const data = await res.json();
+    const data = await requireClient().chat(
+        [
+            { role: "system", content: CAT_SYSTEM },
+            { role: "user", content: userContent },
+        ],
+        { model: "claude-fast" },
+    );
     return data.choices[0].message.content.trim().replace(/^["']|["']$/g, "");
 }
 
@@ -112,23 +62,14 @@ export function createImageGenerationPrompt(
         : `${base} Human with bob hair.`;
 }
 
-export function generateImageURL(prompt, model, imageUrl = null) {
-    let url = `${API}/${encodeURIComponent(prompt)}?height=1024&width=1024&model=${model}`;
-
-    if (imageUrl) {
-        url += `&enhance=false&image=${encodeURIComponent(`${imageUrl},${SELFIE_CATGPT}`)}`;
-    } else {
-        url += `&enhance=true&image=${encodeURIComponent(ORIGINAL_CATGPT)}`;
-    }
-    return url;
-}
-
-// The key goes in the Authorization header, never the URL, so it stays out of
-// the page, saved memes and access logs.
-export function fetchImage(url) {
-    return fetch(url, {
-        headers: { Authorization: `Bearer ${getStoredApiKey()}` },
+export async function generateImage(prompt, model, imageUrl = null) {
+    const { buffer, contentType } = await requireClient().image(prompt, {
+        height: 1024,
+        width: 1024,
+        model,
+        referenceImage: imageUrl ? [imageUrl, SELFIE_CATGPT] : ORIGINAL_CATGPT,
     });
+    return new Blob([buffer], { type: contentType });
 }
 
 // ── Models ──────────────────────────────────────────────────────────────────
@@ -136,28 +77,23 @@ export function fetchImage(url) {
 const PREFERRED_MODELS = ["nanobanana-2-lite", "nanobanana"];
 const FALLBACK_MODEL = "gptimage";
 
-export async function pickModel(apiKey) {
-    try {
-        const res = await fetch(`https://gen.pollinations.ai/image/models`, {
-            headers: { Authorization: `Bearer ${apiKey}` },
-        });
-        if (!res.ok) return { model: FALLBACK_MODEL, isPremium: false };
-        const models = await res.json();
-        for (const preferred of PREFERRED_MODELS) {
-            if (
-                models.some(
-                    (model) =>
-                        model.name === preferred ||
-                        model.aliases?.includes(preferred),
-                )
-            ) {
-                return { model: preferred, isPremium: true };
-            }
+export function selectImageModel(models) {
+    for (const preferred of PREFERRED_MODELS) {
+        if (
+            models.some(
+                (model) =>
+                    model.name === preferred ||
+                    model.aliases?.includes(preferred),
+            )
+        ) {
+            return { model: preferred, isPremium: true };
         }
-        return { model: FALLBACK_MODEL, isPremium: false };
-    } catch {
-        return { model: FALLBACK_MODEL, isPremium: false };
     }
+    return { model: FALLBACK_MODEL, isPremium: false };
+}
+
+export async function pickModel() {
+    return selectImageModel(await requireClient().models("image"));
 }
 
 // ── Media Upload ─────────────────────────────────────────────────────────────
@@ -171,53 +107,19 @@ export async function handleImageUpload(file, notify) {
 
     try {
         notify("Uploading image...", "info");
-        const form = new FormData();
-        form.append("file", file);
-        const res = await fetch(`${MEDIA}/upload`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${getStoredApiKey()}` },
-            body: form,
-        });
-        if (!res.ok) throw new Error("Upload failed");
-        return (await res.json()).url;
+        return (await requireClient().upload(file)).url;
     } catch (err) {
         console.error("Media upload failed:", err);
-        notify("Upload failed. Trying local fallback...", "warning");
-        try {
-            return await new Promise((resolve, reject) => {
-                const r = new FileReader();
-                r.onload = (e) => resolve(e.target.result);
-                r.onerror = reject;
-                r.readAsDataURL(file);
-            });
-        } catch {
-            notify(
-                "Could not process image. Please try a smaller image.",
-                "error",
-            );
-            return null;
-        }
+        notify("Could not upload the image. Please try again.", "error");
+        return null;
     }
 }
 
 export async function publishMemeToGallery(image) {
-    const apiKey = getStoredApiKey();
-    if (!apiKey) throw new Error("Log in before publishing a meme");
-
-    const form = new FormData();
-    form.append("file", image, "catgpt-meme");
-    form.append("tags", COMMUNITY_TAG);
-
-    const response = await fetch(`${MEDIA}/upload`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}` },
-        body: form,
+    return requireClient().upload(image, {
+        name: "catgpt-meme",
+        tags: [COMMUNITY_TAG],
     });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-        throw new Error(data.error || "Could not publish the meme");
-    }
-    return data;
 }
 
 export async function fetchCommunityMemes(limit = 12) {

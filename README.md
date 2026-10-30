@@ -1,5 +1,7 @@
 # 🐱 CatGPT Meme Generator
 
+[![Made with pollinations.ai](https://cdn.jsdelivr.net/npm/@pollinations/ui@0.1.0-alpha.25/dist/brand/badge-made-with.svg)](https://pollinations.ai)
+
 Transform your questions into sassy cat wisdom! A collaboration between [pollinations.ai](https://pollinations.ai) and [Tanika Godbole](https://www.instagram.com/tanikagodbole/), the original creator of the CatGPT comic.
 
 ## 🌟 About
@@ -74,7 +76,9 @@ The app uses the unified `gen.pollinations.ai` API gateway:
 ## Development and deployment
 
 Requires Node.js 24. The browser app stays plain HTML, CSS and JavaScript;
-its API calls use public Pollinations endpoints. Deployment uses the published
+its login, generation and uploads use the published `@pollinations/sdk`;
+the account menu uses the published `@pollinations/ui`. OAuth uses PKCE, sessions
+stay in session storage, and user credentials never go into media or shared URLs. Deployment uses the published
 `@pollinations/cli` package, with no monorepo files or Cloudflare credentials.
 
 ```sh
@@ -84,9 +88,11 @@ npm run build
 python3 -m http.server 8080 --directory dist
 ```
 
-`dist/` contains only the website and its assets. GitHub Pages can still serve
-this repository's root; `generated-examples/` preserves its existing image links.
-The planned primary address is `https://catgpt.pollinations.app`.
+`dist/` contains only the website and its assets. The legacy GitHub Pages deployment will be preserved until the Sites cutover;
+`generated-examples/` preserves its existing image links.
+The new primary address will be `https://catgpt.pollinations.app`.
+Shared links populate the prompt; generation starts only after a click.
+Example cards use bundled images and do not spend Pollen.
 
 Deployment runs through **Deploy / Pollinations production** on the `production`
 branch. The GitHub `production` environment needs `POLLINATIONS_API_KEY` for the

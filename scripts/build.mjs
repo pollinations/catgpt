@@ -1,15 +1,8 @@
-import { cpSync, mkdirSync, rmSync } from "node:fs";
+import { cpSync } from "node:fs";
+import { build } from "vite";
 
-rmSync("dist", { recursive: true, force: true });
-mkdirSync("dist");
-for (const file of [
-    "index.html",
-    "styles.css",
-    "script.js",
-    "ai.js",
-    "images",
-    "public",
-    "generated-examples",
-]) {
-    cpSync(file, `dist/${file}`, { recursive: true });
+await build({ base: "./", publicDir: false });
+// Preserve the original repository's public image paths and shared links.
+for (const folder of ["images", "public", "generated-examples"]) {
+    cpSync(folder, `dist/${folder}`, { recursive: true });
 }
