@@ -1,7 +1,7 @@
 import { Pollinations } from "@pollinations/sdk";
 import { PolliProvider, useAuthState } from "@pollinations/sdk/react";
 import { AppUserMenu } from "@pollinations/ui/app-user-menu/sdk";
-import pollinationsStyles from "@pollinations/ui/styles.css?raw";
+import "@pollinations/ui/app.css";
 import { createElement, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { setClient } from "./ai.js";
@@ -57,7 +57,6 @@ export function mountAuth(onChange) {
                 expiry: 1,
                 storage: "sessionStorage",
             },
-            createElement("style", null, pollinationsStyles),
             createElement(Account, { onChange }),
         ),
     );

@@ -541,7 +541,6 @@ async function updateAuthUI() {
     document
         .querySelector(".generator-section")
         .classList.toggle("hidden", !loggedIn);
-    document.querySelector("header").classList.toggle("hidden", loggedIn);
     if (!loggedIn) {
         if (currentAbort) currentAbort();
         resetButton();
